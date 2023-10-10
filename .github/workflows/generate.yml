@@ -26,6 +26,10 @@ jobs:
       - name: generate
         run: go generate -x -v .
 
+      # Sanity checks the generated files.
+      - name: build
+        run: go build ./...
+
       - name: check for modified versions
         id: is-changed
         run: echo "modified=$(if git status --porcelain | grep -q -E 'processor.go'; then echo "true"; else echo "false"; fi)" >> $GITHUB_OUTPUT
