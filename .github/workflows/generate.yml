@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  ecs-generate:
+  go-generate:
     permissions:
       # Allow job to write to the branch.
       contents: write
