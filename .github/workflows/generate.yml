@@ -1,0 +1,44 @@
+# This is a hack to update the code when new ECS tags are pushed.
+name: generate
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch:
+
+jobs:
+  ecs-generate:
+    permissions:
+      # Allow job to write to the branch.
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version: 1.21
+          cache-dependency-path: ./internal/generator/go.sum
+
+      - name: generate
+        run: go generate
+
+      - name: check for modified versions
+        id: is-changed
+        run: echo "modified=$(if git status --porcelain | grep -q -E 'processor.go'; then echo "true"; else echo "false"; fi)" >> $GITHUB_OUTPUT
+
+      - name: commit updated code
+        if: steps.is-changed.outputs.modified == 'true'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git commit -m "elasticsearch-specification update
+          
+          Update code based on https://github.com/elastic/elasticsearch-specification/blob/main/output/schema/schema.json
+          from $(date)."
+          git push
