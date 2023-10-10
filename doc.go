@@ -19,5 +19,5 @@
 // Ingest Node processors.
 package ingestnode
 
-//go:generate curl -s -L -o ./internal/generator/schema.json "https://github.com/elastic/elasticsearch-specification/raw/main/output/schema/schema.json"
+//go:generate curl -L -o ./internal/generator/schema.json "https://github.com/elastic/elasticsearch-specification/raw/main/output/schema/schema.json"
 //go:generate go run -C ./internal/generator . -o ../../processor.go -f ./schema.json
