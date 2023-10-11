@@ -28,7 +28,7 @@ linters:
 
 linters-settings:
   goimports:
-    local-prefixes: github.com/andrewkroh/go-ecs
+    local-prefixes: github.com/andrewkroh/go-ingest-node
   gofumpt:
     extra-rules: true
   stylecheck:

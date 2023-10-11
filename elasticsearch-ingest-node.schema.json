@@ -1,0 +1,1876 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/andrewkroh/go-ingest-node/pipeline",
+  "$ref": "#/$defs/Pipeline",
+  "$defs": {
+    "AppendProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to be appended to. Supports template snippets. Required."
+        },
+        "value": {
+          "description": "The value to be appended. Supports template snippets. Required."
+        },
+        "allow_duplicates": {
+          "type": "boolean",
+          "description": "If `false`, the processor does not append values already present in the field."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field",
+        "value"
+      ]
+    },
+    "AttachmentProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to get the base64 encoded field from. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and field does not exist, the processor quietly exits without modifying the document."
+        },
+        "indexed_chars": {
+          "type": "integer",
+          "description": "The number of chars being used for extraction to prevent huge fields. Use `-1` for no limit."
+        },
+        "indexed_chars_field": {
+          "type": "string",
+          "description": "Field name from which you can overwrite the number of chars being used for extraction."
+        },
+        "properties": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Array of properties to select to be stored. Can be `content`, `title`, `name`, `author`, `keywords`, `date`, `content_type`, `content_length`, `language`."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field that will hold the attachment information."
+        },
+        "resource_name": {
+          "type": "string",
+          "description": "Field containing the name of the resource to decode. If specified, the processor passes this resource name to the underlying Tika library to enable Resource Name Based Detection."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ]
+    },
+    "BytesProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to convert. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field to assign the converted value to. By default, the field is updated in-place."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ]
+    },
+    "CircleProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "error_distance": {
+          "type": "number",
+          "description": "The difference between the resulting inscribed distance from center to side and the circle’s radius (measured in meters for `geo_shape`, unit-less for `shape`). Required."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to interpret as a circle. Either a string in WKT format or a map for GeoJSON. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist, the processor quietly exits without modifying the document."
+        },
+        "shape_type": {
+          "type": "string",
+          "description": "Which field mapping type is to be used when processing the circle: `geo_shape` or `shape`. Required."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field to assign the polygon shape to By default, the field is updated in-place."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "error_distance",
+        "field",
+        "shape_type"
+      ]
+    },
+    "ConvertProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field whose value is to be converted. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field to assign the converted value to. By default, the `field` is updated in-place."
+        },
+        "type": {
+          "type": "string",
+          "description": "The type to convert the existing value to. Required."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field",
+        "type"
+      ]
+    },
+    "CsvProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "empty_value": {
+          "description": "Value used to fill empty fields. Empty fields are skipped if this is not provided. An empty field is one with no value (2 consecutive separators) or empty quotes (`\"\"`)."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to extract data from. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist, the processor quietly exits without modifying the document."
+        },
+        "quote": {
+          "type": "string",
+          "description": "Quote used in CSV, has to be single character string."
+        },
+        "separator": {
+          "type": "string",
+          "description": "Separator used in CSV, has to be single character string."
+        },
+        "target_fields": {
+          "description": "The array of fields to assign extracted values to. Required."
+        },
+        "trim": {
+          "type": "boolean",
+          "description": "Trim whitespaces in unquoted fields."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field",
+        "target_fields"
+      ]
+    },
+    "DateIndexNameProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "date_formats": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "An array of the expected date formats for parsing dates / timestamps in the document being preprocessed. Can be a java time pattern or one of the following formats: ISO8601, UNIX, UNIX_MS, or TAI64N. Required."
+        },
+        "date_rounding": {
+          "type": "string",
+          "description": "How to round the date when formatting the date into the index name. Valid values are: `y` (year), `M` (month), `w` (week), `d` (day), `h` (hour), `m` (minute) and `s` (second). Supports template snippets. Required."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to get the date or timestamp from. Required."
+        },
+        "index_name_format": {
+          "type": "string",
+          "description": "The format to be used when printing the parsed date into the index name. A valid java time pattern is expected here. Supports template snippets."
+        },
+        "index_name_prefix": {
+          "type": "string",
+          "description": "A prefix of the index name to be prepended before the printed date. Supports template snippets."
+        },
+        "locale": {
+          "type": "string",
+          "description": "The locale to use when parsing the date from the document being preprocessed, relevant when parsing month names or week days."
+        },
+        "timezone": {
+          "type": "string",
+          "description": "The timezone to use when parsing the date and when date math index supports resolves expressions into concrete index names."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "date_formats",
+        "date_rounding",
+        "field"
+      ]
+    },
+    "DateProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to get the date from. Required."
+        },
+        "formats": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "An array of the expected date formats. Can be a java time pattern or one of the following formats: ISO8601, UNIX, UNIX_MS, or TAI64N. Required."
+        },
+        "locale": {
+          "type": "string",
+          "description": "The locale to use when parsing the date, relevant when parsing month names or week days. Supports template snippets."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field that will hold the parsed date."
+        },
+        "timezone": {
+          "type": "string",
+          "description": "The timezone to use when parsing the date. Supports template snippets."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field",
+        "formats"
+      ]
+    },
+    "DissectProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "append_separator": {
+          "type": "string",
+          "description": "The character(s) that separate the appended fields."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to dissect. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document."
+        },
+        "pattern": {
+          "type": "string",
+          "description": "The pattern to apply to the field. Required."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field",
+        "pattern"
+      ]
+    },
+    "DotExpanderProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to expand into an object field. If set to `*`, all top-level fields will be expanded. Required."
+        },
+        "path": {
+          "type": "string",
+          "description": "The field that contains the field to expand. Only required if the field to expand is part another object field, because the `field` option can only understand leaf fields."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ]
+    },
+    "DropProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EnrichProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field in the input document that matches the policies match_field used to retrieve the enrichment data. Supports template snippets. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist, the processor quietly exits without modifying the document."
+        },
+        "max_matches": {
+          "type": "integer",
+          "description": "The maximum number of matched documents to include under the configured target field. The `target_field` will be turned into a json array if `max_matches` is higher than 1, otherwise `target_field` will become a json object. In order to avoid documents getting too large, the maximum allowed value is 128."
+        },
+        "override": {
+          "type": "boolean",
+          "description": "If processor will update fields with pre-existing non-null-valued field. When set to `false`, such fields will not be touched."
+        },
+        "policy_name": {
+          "type": "string",
+          "description": "The name of the enrich policy to use. Required."
+        },
+        "shape_relation": {
+          "type": "string",
+          "description": "A spatial relation operator used to match the geoshape of incoming documents to documents in the enrich index. This option is only used for `geo_match` enrich policy types."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "Field added to incoming documents to contain enrich data. This field contains both the `match_field` and `enrich_fields` specified in the enrich policy. Supports template snippets. Required."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field",
+        "policy_name",
+        "target_field"
+      ]
+    },
+    "FailProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "message": {
+          "type": "string",
+          "description": "The error message thrown by the processor. Supports template snippets. Required."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "message"
+      ]
+    },
+    "ForeachProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "Field containing array or object values. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true`, the processor silently exits without changing the document if the `field` is `null` or missing."
+        },
+        "processor": {
+          "$ref": "#/$defs/ProcessorContainer",
+          "description": "Ingest processor to run on each element. Required."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field",
+        "processor"
+      ]
+    },
+    "GeoIpProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "database_file": {
+          "type": "string",
+          "description": "The database filename referring to a database the module ships with (GeoLite2-City.mmdb, GeoLite2-Country.mmdb, or GeoLite2-ASN.mmdb) or a custom database in the ingest-geoip config directory."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to get the ip address from for the geographical lookup. Required."
+        },
+        "first_only": {
+          "type": "boolean",
+          "description": "If `true`, only the first found geoip data will be returned, even if the field contains an array."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist, the processor quietly exits without modifying the document."
+        },
+        "properties": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Controls what properties are added to the `target_field` based on the geoip lookup."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field that will hold the geographical information looked up from the MaxMind database."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ]
+    },
+    "GrokProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to use for grok expression parsing. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document."
+        },
+        "pattern_definitions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "A map of pattern-name and pattern tuples defining custom patterns to be used by the current processor. Patterns matching existing names will override the pre-existing definition."
+        },
+        "patterns": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "An ordered list of grok expression to match and extract named captures with. Returns on the first expression in the list that matches. Required."
+        },
+        "trace_match": {
+          "type": "boolean",
+          "description": "When `true`, `_ingest._grok_match_index` will be inserted into your matched document’s metadata with the index into the pattern found in `patterns` that matched."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field",
+        "patterns"
+      ]
+    },
+    "GsubProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to apply the replacement to. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document."
+        },
+        "pattern": {
+          "type": "string",
+          "description": "The pattern to be replaced. Required."
+        },
+        "replacement": {
+          "type": "string",
+          "description": "The string to replace the matching patterns with. Required."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field to assign the converted value to By default, the `field` is updated in-place."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field",
+        "pattern",
+        "replacement"
+      ]
+    },
+    "InferenceConfig": {
+      "properties": {
+        "regression": {
+          "$ref": "#/$defs/InferenceConfigRegression",
+          "description": "Regression configuration for inference."
+        },
+        "classification": {
+          "$ref": "#/$defs/InferenceConfigClassification",
+          "description": "Classification configuration for inference."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "InferenceConfigClassification": {
+      "properties": {
+        "num_top_classes": {
+          "type": "integer",
+          "description": "Specifies the number of top class predictions to return."
+        },
+        "num_top_feature_importance_values": {
+          "type": "integer",
+          "description": "Specifies the maximum number of feature importance values per document."
+        },
+        "results_field": {
+          "type": "string",
+          "description": "The field that is added to incoming documents to contain the inference prediction."
+        },
+        "top_classes_results_field": {
+          "type": "string",
+          "description": "Specifies the field to which the top classes are written."
+        },
+        "prediction_field_type": {
+          "type": "string",
+          "description": "Specifies the type of the predicted field to write. Valid values are: `string`, `number`, `boolean`."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "InferenceConfigRegression": {
+      "properties": {
+        "results_field": {
+          "type": "string",
+          "description": "The field that is added to incoming documents to contain the inference prediction."
+        },
+        "num_top_feature_importance_values": {
+          "type": "integer",
+          "description": "Specifies the maximum number of feature importance values per document."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "InferenceProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "model_id": {
+          "type": "string",
+          "description": "The ID or alias for the trained model, or the ID of the deployment. Required."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "Field added to incoming documents to contain results objects."
+        },
+        "field_map": {
+          "type": "object",
+          "description": "Maps the document field names to the known field names of the model. This mapping takes precedence over any default mappings provided in the model configuration."
+        },
+        "inference_config": {
+          "$ref": "#/$defs/InferenceConfig",
+          "description": "Contains the inference type and its options."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "model_id"
+      ]
+    },
+    "JoinProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "Field containing array values to join. Required."
+        },
+        "separator": {
+          "type": "string",
+          "description": "The separator character. Required."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field to assign the joined value to. By default, the field is updated in-place."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field",
+        "separator"
+      ]
+    },
+    "JsonProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "add_to_root": {
+          "type": "boolean",
+          "description": "Flag that forces the parsed JSON to be added at the top level of the document. `target_field` must not be set when this option is chosen."
+        },
+        "add_to_root_conflict_strategy": {
+          "type": "string",
+          "description": "When set to `replace`, root fields that conflict with fields from the parsed JSON will be overridden. When set to `merge`, conflicting fields will be merged. Only applicable `if add_to_root` is set to true."
+        },
+        "allow_duplicate_keys": {
+          "type": "boolean",
+          "description": "When set to `true`, the JSON parser will not fail if the JSON contains duplicate keys. Instead, the last encountered value for any duplicate key wins."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to be parsed. Required."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field that the converted structured object will be written into. Any existing content in this field will be overwritten."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ]
+    },
+    "KeyValueProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "exclude_keys": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "List of keys to exclude from document."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to be parsed. Supports template snippets. Required."
+        },
+        "field_split": {
+          "type": "string",
+          "description": "Regex pattern to use for splitting key-value pairs. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document."
+        },
+        "include_keys": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "List of keys to filter and insert into document. Defaults to including all keys."
+        },
+        "prefix": {
+          "type": "string",
+          "description": "Prefix to be added to extracted keys."
+        },
+        "strip_brackets": {
+          "type": "boolean",
+          "description": "If `true`. strip brackets `()`, `\u003c\u003e`, `[]` as well as quotes `'` and `\"` from extracted values."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field to insert the extracted keys into. Defaults to the root of the document. Supports template snippets."
+        },
+        "trim_key": {
+          "type": "string",
+          "description": "String of characters to trim from extracted keys."
+        },
+        "trim_value": {
+          "type": "string",
+          "description": "String of characters to trim from extracted values."
+        },
+        "value_split": {
+          "type": "string",
+          "description": "Regex pattern to use for splitting the key from the value within a key-value pair. Required."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field",
+        "field_split",
+        "value_split"
+      ]
+    },
+    "LowercaseProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to make lowercase. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field to assign the converted value to. By default, the field is updated in-place."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ]
+    },
+    "Pipeline": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the ingest pipeline."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Processors to run immediately after a processor failure."
+        },
+        "processors": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Processors used to perform transformations on documents before indexing. Processors run sequentially in the order specified."
+        },
+        "version": {
+          "type": "integer",
+          "description": "Version number used by external systems to track ingest pipelines."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "PipelineProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the pipeline to execute. Supports template snippets. Required."
+        },
+        "ignore_missing_pipeline": {
+          "type": "boolean",
+          "description": "Whether to ignore missing pipelines instead of failing."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name"
+      ]
+    },
+    "ProcessorContainer": {
+      "properties": {
+        "attachment": {
+          "$ref": "#/$defs/AttachmentProcessor",
+          "description": "The attachment processor lets Elasticsearch extract file attachments in common formats (such as PPT, XLS, and PDF) by using the Apache text extraction library Tika."
+        },
+        "append": {
+          "$ref": "#/$defs/AppendProcessor",
+          "description": "Appends one or more values to an existing array if the field already exists and it is an array. Converts a scalar to an array and appends one or more values to it if the field exists and it is a scalar. Creates an array containing the provided values if the field doesn’t exist. Accepts a single value or an array of values."
+        },
+        "csv": {
+          "$ref": "#/$defs/CsvProcessor",
+          "description": "Extracts fields from CSV line out of a single text field within a document. Any empty field in CSV will be skipped."
+        },
+        "convert": {
+          "$ref": "#/$defs/ConvertProcessor",
+          "description": "Converts a field in the currently ingested document to a different type, such as converting a string to an integer. If the field value is an array, all members will be converted."
+        },
+        "date": {
+          "$ref": "#/$defs/DateProcessor",
+          "description": "Parses dates from fields, and then uses the date or timestamp as the timestamp for the document."
+        },
+        "date_index_name": {
+          "$ref": "#/$defs/DateIndexNameProcessor",
+          "description": "The purpose of this processor is to point documents to the right time based index based on a date or timestamp field in a document by using the date math index name support."
+        },
+        "dot_expander": {
+          "$ref": "#/$defs/DotExpanderProcessor",
+          "description": "Expands a field with dots into an object field. This processor allows fields with dots in the name to be accessible by other processors in the pipeline. Otherwise these fields can’t be accessed by any processor."
+        },
+        "enrich": {
+          "$ref": "#/$defs/EnrichProcessor",
+          "description": "The `enrich` processor can enrich documents with data from another index."
+        },
+        "fail": {
+          "$ref": "#/$defs/FailProcessor",
+          "description": "Raises an exception. This is useful for when you expect a pipeline to fail and want to relay a specific message to the requester."
+        },
+        "foreach": {
+          "$ref": "#/$defs/ForeachProcessor",
+          "description": "Runs an ingest processor on each element of an array or object."
+        },
+        "json": {
+          "$ref": "#/$defs/JsonProcessor",
+          "description": "Converts a JSON string into a structured JSON object."
+        },
+        "user_agent": {
+          "$ref": "#/$defs/UserAgentProcessor",
+          "description": "The `user_agent` processor extracts details from the user agent string a browser sends with its web requests. This processor adds this information by default under the `user_agent` field."
+        },
+        "kv": {
+          "$ref": "#/$defs/KeyValueProcessor",
+          "description": "This processor helps automatically parse messages (or specific event fields) which are of the `foo=bar` variety."
+        },
+        "geoip": {
+          "$ref": "#/$defs/GeoIpProcessor",
+          "description": "The `geoip` processor adds information about the geographical location of an IPv4 or IPv6 address."
+        },
+        "grok": {
+          "$ref": "#/$defs/GrokProcessor",
+          "description": "Extracts structured fields out of a single text field within a document. You choose which field to extract matched fields from, as well as the grok pattern you expect will match. A grok pattern is like a regular expression that supports aliased expressions that can be reused."
+        },
+        "gsub": {
+          "$ref": "#/$defs/GsubProcessor",
+          "description": "Converts a string field by applying a regular expression and a replacement. If the field is an array of string, all members of the array will be converted. If any non-string values are encountered, the processor will throw an exception."
+        },
+        "join": {
+          "$ref": "#/$defs/JoinProcessor",
+          "description": "Joins each element of an array into a single string using a separator character between each element. Throws an error when the field is not an array."
+        },
+        "lowercase": {
+          "$ref": "#/$defs/LowercaseProcessor",
+          "description": "Converts a string to its lowercase equivalent. If the field is an array of strings, all members of the array will be converted."
+        },
+        "remove": {
+          "$ref": "#/$defs/RemoveProcessor",
+          "description": "Removes existing fields. If one field doesn’t exist, an exception will be thrown."
+        },
+        "rename": {
+          "$ref": "#/$defs/RenameProcessor",
+          "description": "Renames an existing field. If the field doesn’t exist or the new name is already used, an exception will be thrown."
+        },
+        "script": {
+          "description": "Runs an inline or stored script on incoming documents. The script runs in the `ingest` context."
+        },
+        "set": {
+          "$ref": "#/$defs/SetProcessor",
+          "description": "Adds a field with the specified value. If the field already exists, its value will be replaced with the provided one."
+        },
+        "sort": {
+          "$ref": "#/$defs/SortProcessor",
+          "description": "Sorts the elements of an array ascending or descending. Homogeneous arrays of numbers will be sorted numerically, while arrays of strings or heterogeneous arrays of strings + numbers will be sorted lexicographically. Throws an error when the field is not an array."
+        },
+        "split": {
+          "$ref": "#/$defs/SplitProcessor",
+          "description": "Splits a field into an array using a separator character. Only works on string fields."
+        },
+        "trim": {
+          "$ref": "#/$defs/TrimProcessor",
+          "description": "Trims whitespace from a field. If the field is an array of strings, all members of the array will be trimmed. This only works on leading and trailing whitespace."
+        },
+        "uppercase": {
+          "$ref": "#/$defs/UppercaseProcessor",
+          "description": "Converts a string to its uppercase equivalent. If the field is an array of strings, all members of the array will be converted."
+        },
+        "urldecode": {
+          "$ref": "#/$defs/UrlDecodeProcessor",
+          "description": "URL-decodes a string. If the field is an array of strings, all members of the array will be decoded."
+        },
+        "bytes": {
+          "$ref": "#/$defs/BytesProcessor",
+          "description": "Converts a human readable byte value (for example `1kb`) to its value in bytes (for example `1024`). If the field is an array of strings, all members of the array will be converted. Supported human readable units are \"b\", \"kb\", \"mb\", \"gb\", \"tb\", \"pb\" case insensitive. An error will occur if the field is not a supported format or resultant value exceeds 2^63."
+        },
+        "dissect": {
+          "$ref": "#/$defs/DissectProcessor",
+          "description": "Extracts structured fields out of a single text field by matching the text field against a delimiter-based pattern."
+        },
+        "set_security_user": {
+          "$ref": "#/$defs/SetSecurityUserProcessor",
+          "description": "Sets user-related details (such as `username`, `roles`, `email`, `full_name`, `metadata`, `api_key`, `realm` and `authentication_type`) from the current authenticated user to the current document by pre-processing the ingest."
+        },
+        "pipeline": {
+          "$ref": "#/$defs/PipelineProcessor",
+          "description": "Executes another pipeline."
+        },
+        "drop": {
+          "$ref": "#/$defs/DropProcessor",
+          "description": "Drops the document without raising any errors. This is useful to prevent the document from getting indexed based on some condition."
+        },
+        "circle": {
+          "$ref": "#/$defs/CircleProcessor",
+          "description": "Converts circle definitions of shapes to regular polygons which approximate them."
+        },
+        "inference": {
+          "$ref": "#/$defs/InferenceProcessor",
+          "description": "Uses a pre-trained data frame analytics model or a model deployed for natural language processing tasks to infer against the data that is being ingested in the pipeline."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "RemoveProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "description": "Fields to be removed. Supports template snippets. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ]
+    },
+    "RenameProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to be renamed. Supports template snippets. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist, the processor quietly exits without modifying the document."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The new name of the field. Supports template snippets. Required."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field",
+        "target_field"
+      ]
+    },
+    "SetProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "copy_from": {
+          "type": "string",
+          "description": "The origin field which will be copied to `field`, cannot set `value` simultaneously. Supported data types are `boolean`, `number`, `array`, `object`, `string`, `date`, etc."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to insert, upsert, or update. Supports template snippets. Required."
+        },
+        "ignore_empty_value": {
+          "type": "boolean",
+          "description": "If `true` and `value` is a template snippet that evaluates to `null` or the empty string, the processor quietly exits without modifying the document."
+        },
+        "media_type": {
+          "type": "string",
+          "description": "The media type for encoding `value`. Applies only when value is a template snippet. Must be one of `application/json`, `text/plain`, or `application/x-www-form-urlencoded`."
+        },
+        "override": {
+          "type": "boolean",
+          "description": "If `true` processor will update fields with pre-existing non-null-valued field. When set to `false`, such fields will not be touched."
+        },
+        "value": {
+          "description": "The value to be set for the field. Supports template snippets. May specify only one of `value` or `copy_from`."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ]
+    },
+    "SetSecurityUserProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to store the user information into. Required."
+        },
+        "properties": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Controls what user related properties are added to the field."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ]
+    },
+    "SortProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to be sorted. Required."
+        },
+        "order": {
+          "type": "string",
+          "description": "The sort order to use. Accepts `\"asc\"` or `\"desc\"`."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field to assign the sorted value to. By default, the field is updated in-place."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ]
+    },
+    "SplitProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to split. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist, the processor quietly exits without modifying the document."
+        },
+        "preserve_trailing": {
+          "type": "boolean",
+          "description": "Preserves empty trailing fields, if any."
+        },
+        "separator": {
+          "type": "string",
+          "description": "A regex which matches the separator, for example, `,` or `\\s+`. Required."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field to assign the split value to. By default, the field is updated in-place."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field",
+        "separator"
+      ]
+    },
+    "TrimProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The string-valued field to trim whitespace from. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist, the processor quietly exits without modifying the document."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field to assign the trimmed value to. By default, the field is updated in-place."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ]
+    },
+    "UppercaseProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to make uppercase. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field to assign the converted value to. By default, the field is updated in-place."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ]
+    },
+    "UrlDecodeProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to decode. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field to assign the converted value to. By default, the field is updated in-place."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ]
+    },
+    "UserAgentProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field containing the user agent string. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist, the processor quietly exits without modifying the document."
+        },
+        "options": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "regex_file": {
+          "type": "string",
+          "description": "The name of the file in the `config/ingest-user-agent` directory containing the regular expressions for parsing the user agent string. Both the directory and the file have to be created before starting Elasticsearch. If not specified, ingest-user-agent will use the `regexes.yaml` from uap-core it ships with."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field that will be filled with the user agent details."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ]
+    }
+  },
+  "description": "Elasticsearch Ingest Node Pipeline Schema"
+}
