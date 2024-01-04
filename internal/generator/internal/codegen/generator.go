@@ -337,6 +337,8 @@ func identifier(v *spec.ValueOf) string {
 		return "any"
 	case v.LiteralValue != nil:
 		return fmt.Sprintf("%s", v.LiteralValue.Value)
+	case v.DictionaryOf != nil:
+		return fmt.Sprintf("map[%s]%s", identifier(v.DictionaryOf.Key), identifier(v.DictionaryOf.Value))
 	}
 	return ""
 }
