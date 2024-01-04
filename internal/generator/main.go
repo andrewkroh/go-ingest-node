@@ -20,13 +20,12 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"generator/internal/codegen"
+	"generator/internal/spec"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
-
-	"generator/internal/codegen"
-	"generator/internal/spec"
 )
 
 func main() {
@@ -46,7 +45,9 @@ func main() {
 
 	var o io.Writer = os.Stdout
 	if *outputFile != "-" {
-		os.MkdirAll(filepath.Dir(*outputFile), 0o700)
+		if err = os.MkdirAll(filepath.Dir(*outputFile), 0o700); err != nil {
+			log.Fatalf("Failed to create output directory: %v", err)
+		}
 
 		outFile, err := os.Create(*outputFile)
 		if err != nil {

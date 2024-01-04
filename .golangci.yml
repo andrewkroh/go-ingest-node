@@ -18,7 +18,6 @@ linters:
     - errorlint
     - gofumpt
     - goimports
-    - godox
     - misspell
     - prealloc
     - unconvert
@@ -34,6 +33,9 @@ linters-settings:
   stylecheck:
     checks:
       - all
+  staticcheck:
+    checks:
+      - '-SA1019' #  strings.Title is deprecated.
 
 issues:
   include:

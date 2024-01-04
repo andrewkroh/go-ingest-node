@@ -20,6 +20,7 @@ package codegen
 import (
 	"cmp"
 	"fmt"
+	"generator/internal/spec"
 	"io"
 	"slices"
 	"strings"
@@ -28,8 +29,6 @@ import (
 	"github.com/dave/jennifer/jen"
 	"github.com/elastic/go-licenser/licensing"
 	"github.com/fatih/camelcase"
-
-	"generator/internal/spec"
 )
 
 // override the _builtins from the spec with native Go types.
@@ -276,12 +275,15 @@ func (b *Generator) addProperties(g *jen.Group, props []spec.Property) {
 }
 
 func (b *Generator) goStruct(ifc *spec.Interface, f *jen.File) error {
+	var err error
 	f.Type().Id(ifc.TypeName.Name).StructFunc(func(g *jen.Group) {
-		b.addInheritedFields(g, ifc)
+		if err = b.addInheritedFields(g, ifc); err != nil {
+			return
+		}
 		b.addProperties(g, ifc.Properties)
 	})
 
-	return nil
+	return err
 }
 
 func (b *Generator) depsOfType(t *spec.TypeDefinition, deps map[spec.TypeName]bool) {
