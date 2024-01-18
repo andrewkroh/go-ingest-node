@@ -440,6 +440,7 @@ type ProcessorContainer struct {
 	Lowercase       *LowercaseProcessor       `json:"lowercase,omitempty" yaml:"lowercase,omitempty"`                 // Converts a string to its lowercase equivalent. If the field is an array of strings, all members of the array will be converted.
 	Remove          *RemoveProcessor          `json:"remove,omitempty" yaml:"remove,omitempty"`                       // Removes existing fields. If one field doesn’t exist, an exception will be thrown.
 	Rename          *RenameProcessor          `json:"rename,omitempty" yaml:"rename,omitempty"`                       // Renames an existing field. If the field doesn’t exist or the new name is already used, an exception will be thrown.
+	Reroute         *RerouteProcessor         `json:"reroute,omitempty" yaml:"reroute,omitempty"`                     // Routes a document to another target index or data stream. When setting the `destination` option, the target is explicitly specified and the dataset and namespace options can’t be set. When the `destination` option is not set, this processor is in a data stream mode. Note that in this mode, the reroute processor can only be used on data streams that follow the data stream naming scheme.
 	Script          *Script                   `json:"script,omitempty" yaml:"script,omitempty"`                       // Runs an inline or stored script on incoming documents. The script runs in the `ingest` context.
 	Set             *SetProcessor             `json:"set,omitempty" yaml:"set,omitempty"`                             // Adds a field with the specified value. If the field already exists, its value will be replaced with the provided one.
 	Sort            *SortProcessor            `json:"sort,omitempty" yaml:"sort,omitempty"`                           // Sorts the elements of an array ascending or descending. Homogeneous arrays of numbers will be sorted numerically, while arrays of strings or heterogeneous arrays of strings + numbers will be sorted lexicographically. Throws an error when the field is not an array.
@@ -475,6 +476,17 @@ type RenameProcessor struct {
 	Field         Field                `json:"field" yaml:"field"`                                       // The field to be renamed. Supports template snippets. Required.
 	IgnoreMissing *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
 	TargetField   Field                `json:"target_field" yaml:"target_field"`                         // The new name of the field. Supports template snippets. Required.
+}
+
+type RerouteProcessor struct {
+	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
+	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
+	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"` // Ignore failures for the processor.
+	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`         // Handle failures for the processor.
+	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                       // Identifier for the processor. Useful for debugging and metrics.
+	Destination   *string              `json:"destination,omitempty" yaml:"destination,omitempty"`       // A static value for the target. Can’t be set when the dataset or namespace option is set.
+	Dataset       any                  `json:"dataset,omitempty" yaml:"dataset,omitempty"`               // Field references or a static value for the dataset part of the data stream name. In addition to the criteria for index names, cannot contain - and must be no longer than 100 characters. Example values are nginx.access and nginx.error.  Supports field references with a mustache-like syntax (denoted as {{double}} or {{{triple}}} curly braces). When resolving field references, the processor replaces invalid characters with _. Uses the <dataset> part of the index name as a fallback if all field references resolve to a null, missing, or non-string value.  default {{data_stream.dataset}}.
+	Namespace     any                  `json:"namespace,omitempty" yaml:"namespace,omitempty"`           // Field references or a static value for the namespace part of the data stream name. See the criteria for index names for allowed characters. Must be no longer than 100 characters.  Supports field references with a mustache-like syntax (denoted as {{double}} or {{{triple}}} curly braces). When resolving field references, the processor replaces invalid characters with _. Uses the <namespace> part of the index name as a fallback if all field references resolve to a null, missing, or non-string value.  default {{data_stream.namespace}}.
 }
 
 type SetProcessor struct {

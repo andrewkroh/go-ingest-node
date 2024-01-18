@@ -1357,6 +1357,10 @@
           "$ref": "#/$defs/RenameProcessor",
           "description": "Renames an existing field. If the field doesn’t exist or the new name is already used, an exception will be thrown."
         },
+        "reroute": {
+          "$ref": "#/$defs/RerouteProcessor",
+          "description": "Routes a document to another target index or data stream. When setting the `destination` option, the target is explicitly specified and the dataset and namespace options can’t be set. When the `destination` option is not set, this processor is in a data stream mode. Note that in this mode, the reroute processor can only be used on data streams that follow the data stream naming scheme."
+        },
         "script": {
           "description": "Runs an inline or stored script on incoming documents. The script runs in the `ingest` context."
         },
@@ -1499,6 +1503,45 @@
         "field",
         "target_field"
       ]
+    },
+    "RerouteProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "destination": {
+          "type": "string",
+          "description": "A static value for the target. Can’t be set when the dataset or namespace option is set."
+        },
+        "dataset": {
+          "description": "Field references or a static value for the dataset part of the data stream name. In addition to the criteria for index names, cannot contain - and must be no longer than 100 characters. Example values are nginx.access and nginx.error.  Supports field references with a mustache-like syntax (denoted as {{double}} or {{{triple}}} curly braces). When resolving field references, the processor replaces invalid characters with _. Uses the \u003cdataset\u003e part of the index name as a fallback if all field references resolve to a null, missing, or non-string value.  default {{data_stream.dataset}}."
+        },
+        "namespace": {
+          "description": "Field references or a static value for the namespace part of the data stream name. See the criteria for index names for allowed characters. Must be no longer than 100 characters.  Supports field references with a mustache-like syntax (denoted as {{double}} or {{{triple}}} curly braces). When resolving field references, the processor replaces invalid characters with _. Uses the \u003cnamespace\u003e part of the index name as a fallback if all field references resolve to a null, missing, or non-string value.  default {{data_stream.namespace}}."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
     },
     "SetProcessor": {
       "properties": {
