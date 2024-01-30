@@ -48,15 +48,6 @@ const (
 	MergeJSONProcessorConflictStrategy   JsonProcessorConflictStrategy = "merge"
 )
 
-type ScriptLanguage string
-
-const (
-	PainlessScriptLanguage   ScriptLanguage = "painless"
-	ExpressionScriptLanguage ScriptLanguage = "expression"
-	MustacheScriptLanguage   ScriptLanguage = "mustache"
-	JavaScriptLanguage       ScriptLanguage = "java"
-)
-
 type ShapeType string
 
 const (
@@ -94,7 +85,6 @@ type (
 	Id            string
 	Metadata      map[string]any
 	Name          string
-	Script        any
 	VersionNumber int64
 )
 
@@ -340,13 +330,6 @@ type InferenceProcessor struct {
 	InferenceConfig *InferenceConfig     `json:"inference_config,omitempty" yaml:"inference_config,omitempty"` // Contains the inference type and its options.
 }
 
-type InlineScript struct {
-	Params  map[string]any    `json:"params,omitempty" yaml:"params,omitempty"` // Specifies any named parameters that are passed into the script as variables. Use parameters instead of hard-coded values to decrease compile time.
-	Lang    *ScriptLanguage   `json:"lang,omitempty" yaml:"lang,omitempty"`     // Specifies the language the script is written in.
-	Options map[string]string `json:"options,omitempty" yaml:"options,omitempty"`
-	Source  string            `json:"source" yaml:"source"` // The script source. Required.
-}
-
 type JoinProcessor struct {
 	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
 	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
@@ -441,7 +424,7 @@ type ProcessorContainer struct {
 	Remove          *RemoveProcessor          `json:"remove,omitempty" yaml:"remove,omitempty"`                       // Removes existing fields. If one field doesn’t exist, an exception will be thrown.
 	Rename          *RenameProcessor          `json:"rename,omitempty" yaml:"rename,omitempty"`                       // Renames an existing field. If the field doesn’t exist or the new name is already used, an exception will be thrown.
 	Reroute         *RerouteProcessor         `json:"reroute,omitempty" yaml:"reroute,omitempty"`                     // Routes a document to another target index or data stream. When setting the `destination` option, the target is explicitly specified and the dataset and namespace options can’t be set. When the `destination` option is not set, this processor is in a data stream mode. Note that in this mode, the reroute processor can only be used on data streams that follow the data stream naming scheme.
-	Script          *Script                   `json:"script,omitempty" yaml:"script,omitempty"`                       // Runs an inline or stored script on incoming documents. The script runs in the `ingest` context.
+	Script          *ScriptProcessor          `json:"script,omitempty" yaml:"script,omitempty"`                       // Runs an inline or stored script on incoming documents. The script runs in the `ingest` context.
 	Set             *SetProcessor             `json:"set,omitempty" yaml:"set,omitempty"`                             // Adds a field with the specified value. If the field already exists, its value will be replaced with the provided one.
 	Sort            *SortProcessor            `json:"sort,omitempty" yaml:"sort,omitempty"`                           // Sorts the elements of an array ascending or descending. Homogeneous arrays of numbers will be sorted numerically, while arrays of strings or heterogeneous arrays of strings + numbers will be sorted lexicographically. Throws an error when the field is not an array.
 	Split           *SplitProcessor           `json:"split,omitempty" yaml:"split,omitempty"`                         // Splits a field into an array using a separator character. Only works on string fields.
@@ -487,6 +470,18 @@ type RerouteProcessor struct {
 	Destination   *string              `json:"destination,omitempty" yaml:"destination,omitempty"`       // A static value for the target. Can’t be set when the dataset or namespace option is set.
 	Dataset       any                  `json:"dataset,omitempty" yaml:"dataset,omitempty"`               // Field references or a static value for the dataset part of the data stream name. In addition to the criteria for index names, cannot contain - and must be no longer than 100 characters. Example values are nginx.access and nginx.error.  Supports field references with a mustache-like syntax (denoted as {{double}} or {{{triple}}} curly braces). When resolving field references, the processor replaces invalid characters with _. Uses the <dataset> part of the index name as a fallback if all field references resolve to a null, missing, or non-string value.  default {{data_stream.dataset}}.
 	Namespace     any                  `json:"namespace,omitempty" yaml:"namespace,omitempty"`           // Field references or a static value for the namespace part of the data stream name. See the criteria for index names for allowed characters. Must be no longer than 100 characters.  Supports field references with a mustache-like syntax (denoted as {{double}} or {{{triple}}} curly braces). When resolving field references, the processor replaces invalid characters with _. Uses the <namespace> part of the index name as a fallback if all field references resolve to a null, missing, or non-string value.  default {{data_stream.namespace}}.
+}
+
+type ScriptProcessor struct {
+	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
+	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
+	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"` // Ignore failures for the processor.
+	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`         // Handle failures for the processor.
+	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                       // Identifier for the processor. Useful for debugging and metrics.
+	ID            *Id                  `json:"id,omitempty" yaml:"id,omitempty"`                         // ID of a stored script. If no `source` is specified, this parameter is required.
+	Lang          *string              `json:"lang,omitempty" yaml:"lang,omitempty"`                     // Script language.
+	Params        map[string]any       `json:"params,omitempty" yaml:"params,omitempty"`                 // Object containing parameters for the script.
+	Source        *string              `json:"source,omitempty" yaml:"source,omitempty"`                 // Inline script. If no `id` is specified, this parameter is required.
 }
 
 type SetProcessor struct {
@@ -535,11 +530,6 @@ type SplitProcessor struct {
 	PreserveTrailing *bool                `json:"preserve_trailing,omitempty" yaml:"preserve_trailing,omitempty"` // Preserves empty trailing fields, if any.
 	Separator        string               `json:"separator" yaml:"separator"`                                     // A regex which matches the separator, for example, `,` or `\s+`. Required.
 	TargetField      *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`           // The field to assign the split value to. By default, the field is updated in-place.
-}
-
-type StoredScriptId struct {
-	Params map[string]any `json:"params,omitempty" yaml:"params,omitempty"` // Specifies any named parameters that are passed into the script as variables. Use parameters instead of hard-coded values to decrease compile time.
-	ID     Id             `json:"id" yaml:"id"`                             // The `id` for a stored script. Required.
 }
 
 type TrimProcessor struct {
