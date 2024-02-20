@@ -99,6 +99,10 @@
           "type": "string",
           "description": "The field that will hold the attachment information."
         },
+        "remove_binary": {
+          "type": "boolean",
+          "description": "If true, the binary field will be removed from the document."
+        },
         "resource_name": {
           "type": "string",
           "description": "Field containing the name of the resource to decode. If specified, the processor passes this resource name to the underlying Tika library to enable Resource Name Based Detection."

@@ -113,6 +113,7 @@ type AttachmentProcessor struct {
 	IndexedCharsField *Field               `json:"indexed_chars_field,omitempty" yaml:"indexed_chars_field,omitempty"` // Field name from which you can overwrite the number of chars being used for extraction.
 	Properties        []string             `json:"properties,omitempty" yaml:"properties,omitempty"`                   // Array of properties to select to be stored. Can be `content`, `title`, `name`, `author`, `keywords`, `date`, `content_type`, `content_length`, `language`.
 	TargetField       *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`               // The field that will hold the attachment information.
+	RemoveBinary      *bool                `json:"remove_binary,omitempty" yaml:"remove_binary,omitempty"`             // If true, the binary field will be removed from the document.
 	ResourceName      *string              `json:"resource_name,omitempty" yaml:"resource_name,omitempty"`             // Field containing the name of the resource to decode. If specified, the processor passes this resource name to the underlying Tika library to enable Resource Name Based Detection.
 }
 
