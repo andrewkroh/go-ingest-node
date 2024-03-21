@@ -25,6 +25,13 @@ jobs:
       - name: Test
         run: go test ./...
 
+      - name: generate
+        run: go generate -x -v .
+
+      # Sanity checks the generated files.
+      - name: build
+        run: go build ./...
+
   test-generator:
     name: test-generator
     runs-on: ubuntu-latest
