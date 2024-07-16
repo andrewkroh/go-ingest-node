@@ -1278,21 +1278,29 @@
     },
     "ProcessorContainer": {
       "properties": {
-        "attachment": {
-          "$ref": "#/$defs/AttachmentProcessor",
-          "description": "The attachment processor lets Elasticsearch extract file attachments in common formats (such as PPT, XLS, and PDF) by using the Apache text extraction library Tika."
-        },
         "append": {
           "$ref": "#/$defs/AppendProcessor",
           "description": "Appends one or more values to an existing array if the field already exists and it is an array. Converts a scalar to an array and appends one or more values to it if the field exists and it is a scalar. Creates an array containing the provided values if the field doesn’t exist. Accepts a single value or an array of values."
         },
-        "csv": {
-          "$ref": "#/$defs/CsvProcessor",
-          "description": "Extracts fields from CSV line out of a single text field within a document. Any empty field in CSV will be skipped."
+        "attachment": {
+          "$ref": "#/$defs/AttachmentProcessor",
+          "description": "The attachment processor lets Elasticsearch extract file attachments in common formats (such as PPT, XLS, and PDF) by using the Apache text extraction library Tika."
+        },
+        "bytes": {
+          "$ref": "#/$defs/BytesProcessor",
+          "description": "Converts a human readable byte value (for example `1kb`) to its value in bytes (for example `1024`). If the field is an array of strings, all members of the array will be converted. Supported human readable units are \"b\", \"kb\", \"mb\", \"gb\", \"tb\", \"pb\" case insensitive. An error will occur if the field is not a supported format or resultant value exceeds 2^63."
+        },
+        "circle": {
+          "$ref": "#/$defs/CircleProcessor",
+          "description": "Converts circle definitions of shapes to regular polygons which approximate them."
         },
         "convert": {
           "$ref": "#/$defs/ConvertProcessor",
           "description": "Converts a field in the currently ingested document to a different type, such as converting a string to an integer. If the field value is an array, all members will be converted."
+        },
+        "csv": {
+          "$ref": "#/$defs/CsvProcessor",
+          "description": "Extracts fields from CSV line out of a single text field within a document. Any empty field in CSV will be skipped."
         },
         "date": {
           "$ref": "#/$defs/DateProcessor",
@@ -1302,9 +1310,17 @@
           "$ref": "#/$defs/DateIndexNameProcessor",
           "description": "The purpose of this processor is to point documents to the right time based index based on a date or timestamp field in a document by using the date math index name support."
         },
+        "dissect": {
+          "$ref": "#/$defs/DissectProcessor",
+          "description": "Extracts structured fields out of a single text field by matching the text field against a delimiter-based pattern."
+        },
         "dot_expander": {
           "$ref": "#/$defs/DotExpanderProcessor",
           "description": "Expands a field with dots into an object field. This processor allows fields with dots in the name to be accessible by other processors in the pipeline. Otherwise these fields can’t be accessed by any processor."
+        },
+        "drop": {
+          "$ref": "#/$defs/DropProcessor",
+          "description": "Drops the document without raising any errors. This is useful to prevent the document from getting indexed based on some condition."
         },
         "enrich": {
           "$ref": "#/$defs/EnrichProcessor",
@@ -1318,18 +1334,6 @@
           "$ref": "#/$defs/ForeachProcessor",
           "description": "Runs an ingest processor on each element of an array or object."
         },
-        "json": {
-          "$ref": "#/$defs/JsonProcessor",
-          "description": "Converts a JSON string into a structured JSON object."
-        },
-        "user_agent": {
-          "$ref": "#/$defs/UserAgentProcessor",
-          "description": "The `user_agent` processor extracts details from the user agent string a browser sends with its web requests. This processor adds this information by default under the `user_agent` field."
-        },
-        "kv": {
-          "$ref": "#/$defs/KeyValueProcessor",
-          "description": "This processor helps automatically parse messages (or specific event fields) which are of the `foo=bar` variety."
-        },
         "geoip": {
           "$ref": "#/$defs/GeoIpProcessor",
           "description": "The `geoip` processor adds information about the geographical location of an IPv4 or IPv6 address."
@@ -1342,13 +1346,29 @@
           "$ref": "#/$defs/GsubProcessor",
           "description": "Converts a string field by applying a regular expression and a replacement. If the field is an array of string, all members of the array will be converted. If any non-string values are encountered, the processor will throw an exception."
         },
+        "inference": {
+          "$ref": "#/$defs/InferenceProcessor",
+          "description": "Uses a pre-trained data frame analytics model or a model deployed for natural language processing tasks to infer against the data that is being ingested in the pipeline."
+        },
         "join": {
           "$ref": "#/$defs/JoinProcessor",
           "description": "Joins each element of an array into a single string using a separator character between each element. Throws an error when the field is not an array."
         },
+        "json": {
+          "$ref": "#/$defs/JsonProcessor",
+          "description": "Converts a JSON string into a structured JSON object."
+        },
+        "kv": {
+          "$ref": "#/$defs/KeyValueProcessor",
+          "description": "This processor helps automatically parse messages (or specific event fields) which are of the `foo=bar` variety."
+        },
         "lowercase": {
           "$ref": "#/$defs/LowercaseProcessor",
           "description": "Converts a string to its lowercase equivalent. If the field is an array of strings, all members of the array will be converted."
+        },
+        "pipeline": {
+          "$ref": "#/$defs/PipelineProcessor",
+          "description": "Executes another pipeline."
         },
         "remove": {
           "$ref": "#/$defs/RemoveProcessor",
@@ -1370,6 +1390,10 @@
           "$ref": "#/$defs/SetProcessor",
           "description": "Adds a field with the specified value. If the field already exists, its value will be replaced with the provided one."
         },
+        "set_security_user": {
+          "$ref": "#/$defs/SetSecurityUserProcessor",
+          "description": "Sets user-related details (such as `username`, `roles`, `email`, `full_name`, `metadata`, `api_key`, `realm` and `authentication_type`) from the current authenticated user to the current document by pre-processing the ingest."
+        },
         "sort": {
           "$ref": "#/$defs/SortProcessor",
           "description": "Sorts the elements of an array ascending or descending. Homogeneous arrays of numbers will be sorted numerically, while arrays of strings or heterogeneous arrays of strings + numbers will be sorted lexicographically. Throws an error when the field is not an array."
@@ -1390,33 +1414,9 @@
           "$ref": "#/$defs/UrlDecodeProcessor",
           "description": "URL-decodes a string. If the field is an array of strings, all members of the array will be decoded."
         },
-        "bytes": {
-          "$ref": "#/$defs/BytesProcessor",
-          "description": "Converts a human readable byte value (for example `1kb`) to its value in bytes (for example `1024`). If the field is an array of strings, all members of the array will be converted. Supported human readable units are \"b\", \"kb\", \"mb\", \"gb\", \"tb\", \"pb\" case insensitive. An error will occur if the field is not a supported format or resultant value exceeds 2^63."
-        },
-        "dissect": {
-          "$ref": "#/$defs/DissectProcessor",
-          "description": "Extracts structured fields out of a single text field by matching the text field against a delimiter-based pattern."
-        },
-        "set_security_user": {
-          "$ref": "#/$defs/SetSecurityUserProcessor",
-          "description": "Sets user-related details (such as `username`, `roles`, `email`, `full_name`, `metadata`, `api_key`, `realm` and `authentication_type`) from the current authenticated user to the current document by pre-processing the ingest."
-        },
-        "pipeline": {
-          "$ref": "#/$defs/PipelineProcessor",
-          "description": "Executes another pipeline."
-        },
-        "drop": {
-          "$ref": "#/$defs/DropProcessor",
-          "description": "Drops the document without raising any errors. This is useful to prevent the document from getting indexed based on some condition."
-        },
-        "circle": {
-          "$ref": "#/$defs/CircleProcessor",
-          "description": "Converts circle definitions of shapes to regular polygons which approximate them."
-        },
-        "inference": {
-          "$ref": "#/$defs/InferenceProcessor",
-          "description": "Uses a pre-trained data frame analytics model or a model deployed for natural language processing tasks to infer against the data that is being ingested in the pipeline."
+        "user_agent": {
+          "$ref": "#/$defs/UserAgentProcessor",
+          "description": "The `user_agent` processor extracts details from the user agent string a browser sends with its web requests. This processor adds this information by default under the `user_agent` field."
         }
       },
       "additionalProperties": false,
@@ -1449,6 +1449,9 @@
         },
         "field": {
           "description": "Fields to be removed. Supports template snippets. Required."
+        },
+        "keep": {
+          "description": "Fields to be kept. When set, all fields other than those specified are removed."
         },
         "ignore_missing": {
           "type": "boolean",
