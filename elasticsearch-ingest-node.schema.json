@@ -874,6 +874,50 @@
         "replacement"
       ]
     },
+    "HtmlStripProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The string-valued field to remove HTML tags from. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document,."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field to assign the converted value to By default, the `field` is updated in-place."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ]
+    },
     "InferenceConfig": {
       "properties": {
         "regression": {
@@ -1346,6 +1390,10 @@
           "$ref": "#/$defs/GsubProcessor",
           "description": "Converts a string field by applying a regular expression and a replacement. If the field is an array of string, all members of the array will be converted. If any non-string values are encountered, the processor will throw an exception."
         },
+        "html_strip": {
+          "$ref": "#/$defs/HtmlStripProcessor",
+          "description": "Removes HTML tags from the field. If the field is an array of strings, HTML tags will be removed from all members of the array."
+        },
         "inference": {
           "$ref": "#/$defs/InferenceProcessor",
           "description": "Uses a pre-trained data frame analytics model or a model deployed for natural language processing tasks to infer against the data that is being ingested in the pipeline."
@@ -1413,6 +1461,10 @@
         "urldecode": {
           "$ref": "#/$defs/UrlDecodeProcessor",
           "description": "URL-decodes a string. If the field is an array of strings, all members of the array will be decoded."
+        },
+        "uri_parts": {
+          "$ref": "#/$defs/UriPartsProcessor",
+          "description": "Parses a Uniform Resource Identifier (URI) string and extracts its components as an object. This URI object includes properties for the URI’s domain, path, fragment, port, query, scheme, user info, username, and password."
         },
         "user_agent": {
           "$ref": "#/$defs/UserAgentProcessor",
@@ -1868,6 +1920,58 @@
         "target_field": {
           "type": "string",
           "description": "The field to assign the converted value to. By default, the field is updated in-place."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ]
+    },
+    "UriPartsProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "Field containing the URI string. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist, the processor quietly exits without modifying the document."
+        },
+        "keep_original": {
+          "type": "boolean",
+          "description": "If `true`, the processor copies the unparsed URI to `\u003ctarget_field\u003e.original`."
+        },
+        "remove_if_successful": {
+          "type": "boolean",
+          "description": "If `true`, the processor removes the `field` after parsing the URI string. If parsing fails, the processor does not remove the `field`."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "Output field for the URI object."
         }
       },
       "additionalProperties": false,

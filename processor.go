@@ -301,6 +301,17 @@ type GsubProcessor struct {
 	TargetField   *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`     // The field to assign the converted value to By default, the `field` is updated in-place.
 }
 
+type HtmlStripProcessor struct {
+	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
+	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
+	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"` // Ignore failures for the processor.
+	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`         // Handle failures for the processor.
+	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                       // Identifier for the processor. Useful for debugging and metrics.
+	Field         Field                `json:"field" yaml:"field"`                                       // The string-valued field to remove HTML tags from. Required.
+	IgnoreMissing *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document,.
+	TargetField   *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`     // The field to assign the converted value to By default, the `field` is updated in-place.
+}
+
 type InferenceConfig struct {
 	Regression     *InferenceConfigRegression     `json:"regression,omitempty" yaml:"regression,omitempty"`         // Regression configuration for inference.
 	Classification *InferenceConfigClassification `json:"classification,omitempty" yaml:"classification,omitempty"` // Classification configuration for inference.
@@ -421,6 +432,7 @@ type ProcessorContainer struct {
 	Geoip           *GeoIpProcessor           `json:"geoip,omitempty" yaml:"geoip,omitempty"`                         // The `geoip` processor adds information about the geographical location of an IPv4 or IPv6 address.
 	Grok            *GrokProcessor            `json:"grok,omitempty" yaml:"grok,omitempty"`                           // Extracts structured fields out of a single text field within a document. You choose which field to extract matched fields from, as well as the grok pattern you expect will match. A grok pattern is like a regular expression that supports aliased expressions that can be reused.
 	Gsub            *GsubProcessor            `json:"gsub,omitempty" yaml:"gsub,omitempty"`                           // Converts a string field by applying a regular expression and a replacement. If the field is an array of string, all members of the array will be converted. If any non-string values are encountered, the processor will throw an exception.
+	HtmlStrip       *HtmlStripProcessor       `json:"html_strip,omitempty" yaml:"html_strip,omitempty"`               // Removes HTML tags from the field. If the field is an array of strings, HTML tags will be removed from all members of the array.
 	Inference       *InferenceProcessor       `json:"inference,omitempty" yaml:"inference,omitempty"`                 // Uses a pre-trained data frame analytics model or a model deployed for natural language processing tasks to infer against the data that is being ingested in the pipeline.
 	Join            *JoinProcessor            `json:"join,omitempty" yaml:"join,omitempty"`                           // Joins each element of an array into a single string using a separator character between each element. Throws an error when the field is not an array.
 	JSON            *JsonProcessor            `json:"json,omitempty" yaml:"json,omitempty"`                           // Converts a JSON string into a structured JSON object.
@@ -438,6 +450,7 @@ type ProcessorContainer struct {
 	Trim            *TrimProcessor            `json:"trim,omitempty" yaml:"trim,omitempty"`                           // Trims whitespace from a field. If the field is an array of strings, all members of the array will be trimmed. This only works on leading and trailing whitespace.
 	Uppercase       *UppercaseProcessor       `json:"uppercase,omitempty" yaml:"uppercase,omitempty"`                 // Converts a string to its uppercase equivalent. If the field is an array of strings, all members of the array will be converted.
 	URLDecode       *UrlDecodeProcessor       `json:"urldecode,omitempty" yaml:"urldecode,omitempty"`                 // URL-decodes a string. If the field is an array of strings, all members of the array will be decoded.
+	URIParts        *UriPartsProcessor        `json:"uri_parts,omitempty" yaml:"uri_parts,omitempty"`                 // Parses a Uniform Resource Identifier (URI) string and extracts its components as an object. This URI object includes properties for the URI’s domain, path, fragment, port, query, scheme, user info, username, and password.
 	UserAgent       *UserAgentProcessor       `json:"user_agent,omitempty" yaml:"user_agent,omitempty"`               // The `user_agent` processor extracts details from the user agent string a browser sends with its web requests. This processor adds this information by default under the `user_agent` field.
 }
 
@@ -554,6 +567,19 @@ type UppercaseProcessor struct {
 	Field         Field                `json:"field" yaml:"field"`                                       // The field to make uppercase. Required.
 	IgnoreMissing *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
 	TargetField   *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`     // The field to assign the converted value to. By default, the field is updated in-place.
+}
+
+type UriPartsProcessor struct {
+	Description        *string              `json:"description,omitempty" yaml:"description,omitempty"`                   // Description of the processor. Useful for describing the purpose of the processor or its configuration.
+	If                 *string              `json:"if,omitempty" yaml:"if,omitempty"`                                     // Conditionally execute the processor.
+	IgnoreFailure      *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`             // Ignore failures for the processor.
+	OnFailure          []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                     // Handle failures for the processor.
+	Tag                *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                   // Identifier for the processor. Useful for debugging and metrics.
+	Field              Field                `json:"field" yaml:"field"`                                                   // Field containing the URI string. Required.
+	IgnoreMissing      *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"`             // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
+	KeepOriginal       *bool                `json:"keep_original,omitempty" yaml:"keep_original,omitempty"`               // If `true`, the processor copies the unparsed URI to `<target_field>.original`.
+	RemoveIfSuccessful *bool                `json:"remove_if_successful,omitempty" yaml:"remove_if_successful,omitempty"` // If `true`, the processor removes the `field` after parsing the URI string. If parsing fails, the processor does not remove the `field`.
+	TargetField        *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`                 // Output field for the URI object.
 }
 
 type UrlDecodeProcessor struct {
