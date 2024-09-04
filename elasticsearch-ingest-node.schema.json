@@ -702,6 +702,75 @@
         "processor"
       ]
     },
+    "GeoGridProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to interpret as a geo-tile.= The field format is determined by the `tile_type`. Required."
+        },
+        "tile_type": {
+          "type": "string",
+          "description": "Three tile formats are understood: geohash, geotile and geohex. Required."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field to assign the polygon shape to, by default, the `field` is updated in-place."
+        },
+        "parent_field": {
+          "type": "string",
+          "description": "If specified and a parent tile exists, save that tile address to this field."
+        },
+        "children_field": {
+          "type": "string",
+          "description": "If specified and children tiles exist, save those tile addresses to this field as an array of strings."
+        },
+        "non_children_field": {
+          "type": "string",
+          "description": "If specified and intersecting non-child tiles exist, save their addresses to this field as an array of strings."
+        },
+        "precision_field": {
+          "type": "string",
+          "description": "If specified, save the tile precision (zoom) as an integer to this field."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist, the processor quietly exits without modifying the document."
+        },
+        "target_format": {
+          "type": "string",
+          "description": "Which format to save the generated polygon in."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field",
+        "tile_type"
+      ]
+    },
     "GeoIpProcessor": {
       "properties": {
         "description": {
@@ -1377,6 +1446,10 @@
         "foreach": {
           "$ref": "#/$defs/ForeachProcessor",
           "description": "Runs an ingest processor on each element of an array or object."
+        },
+        "geo_grid": {
+          "$ref": "#/$defs/GeoGridProcessor",
+          "description": "Converts geo-grid definitions of grid tiles or cells to regular bounding boxes or polygons which describe their shape. This is useful if there is a need to interact with the tile shapes as spatially indexable fields."
         },
         "geoip": {
           "$ref": "#/$defs/GeoIpProcessor",

@@ -32,6 +32,21 @@ const (
 	AutoConvertType    ConvertType = "auto"
 )
 
+type GeoGridTargetFormat string
+
+const (
+	GeojsonGeoGridTargetFormat GeoGridTargetFormat = "geojson"
+	WktGeoGridTargetFormat     GeoGridTargetFormat = "wkt"
+)
+
+type GeoGridTileType string
+
+const (
+	GeotileGeoGridTileType GeoGridTileType = "geotile"
+	GeohexGeoGridTileType  GeoGridTileType = "geohex"
+	GeohashGeoGridTileType GeoGridTileType = "geohash"
+)
+
 type GeoShapeRelation string
 
 const (
@@ -261,6 +276,23 @@ type ForeachProcessor struct {
 	Processor     ProcessorContainer   `json:"processor" yaml:"processor"`                               // Ingest processor to run on each element. Required.
 }
 
+type GeoGridProcessor struct {
+	Description      *string              `json:"description,omitempty" yaml:"description,omitempty"`               // Description of the processor. Useful for describing the purpose of the processor or its configuration.
+	If               *string              `json:"if,omitempty" yaml:"if,omitempty"`                                 // Conditionally execute the processor.
+	IgnoreFailure    *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`         // Ignore failures for the processor.
+	OnFailure        []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                 // Handle failures for the processor.
+	Tag              *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                               // Identifier for the processor. Useful for debugging and metrics.
+	Field            string               `json:"field" yaml:"field"`                                               // The field to interpret as a geo-tile.= The field format is determined by the `tile_type`. Required.
+	TileType         GeoGridTileType      `json:"tile_type" yaml:"tile_type"`                                       // Three tile formats are understood: geohash, geotile and geohex. Required.
+	TargetField      *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`             // The field to assign the polygon shape to, by default, the `field` is updated in-place.
+	ParentField      *Field               `json:"parent_field,omitempty" yaml:"parent_field,omitempty"`             // If specified and a parent tile exists, save that tile address to this field.
+	ChildrenField    *Field               `json:"children_field,omitempty" yaml:"children_field,omitempty"`         // If specified and children tiles exist, save those tile addresses to this field as an array of strings.
+	NonChildrenField *Field               `json:"non_children_field,omitempty" yaml:"non_children_field,omitempty"` // If specified and intersecting non-child tiles exist, save their addresses to this field as an array of strings.
+	PrecisionField   *Field               `json:"precision_field,omitempty" yaml:"precision_field,omitempty"`       // If specified, save the tile precision (zoom) as an integer to this field.
+	IgnoreMissing    *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"`         // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
+	TargetFormat     *GeoGridTargetFormat `json:"target_format,omitempty" yaml:"target_format,omitempty"`           // Which format to save the generated polygon in.
+}
+
 type GeoIpProcessor struct {
 	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
 	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
@@ -429,6 +461,7 @@ type ProcessorContainer struct {
 	Enrich          *EnrichProcessor          `json:"enrich,omitempty" yaml:"enrich,omitempty"`                       // The `enrich` processor can enrich documents with data from another index.
 	Fail            *FailProcessor            `json:"fail,omitempty" yaml:"fail,omitempty"`                           // Raises an exception. This is useful for when you expect a pipeline to fail and want to relay a specific message to the requester.
 	Foreach         *ForeachProcessor         `json:"foreach,omitempty" yaml:"foreach,omitempty"`                     // Runs an ingest processor on each element of an array or object.
+	GeoGrid         *GeoGridProcessor         `json:"geo_grid,omitempty" yaml:"geo_grid,omitempty"`                   // Converts geo-grid definitions of grid tiles or cells to regular bounding boxes or polygons which describe their shape. This is useful if there is a need to interact with the tile shapes as spatially indexable fields.
 	Geoip           *GeoIpProcessor           `json:"geoip,omitempty" yaml:"geoip,omitempty"`                         // The `geoip` processor adds information about the geographical location of an IPv4 or IPv6 address.
 	Grok            *GrokProcessor            `json:"grok,omitempty" yaml:"grok,omitempty"`                           // Extracts structured fields out of a single text field within a document. You choose which field to extract matched fields from, as well as the grok pattern you expect will match. A grok pattern is like a regular expression that supports aliased expressions that can be reused.
 	Gsub            *GsubProcessor            `json:"gsub,omitempty" yaml:"gsub,omitempty"`                           // Converts a string field by applying a regular expression and a replacement. If the field is an array of string, all members of the array will be converted. If any non-string values are encountered, the processor will throw an exception.
