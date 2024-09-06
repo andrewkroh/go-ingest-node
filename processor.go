@@ -80,16 +80,11 @@ const (
 type UserAgentProperty string
 
 const (
-	NameUserAgentProperty    UserAgentProperty = "NAME"
-	MajorUserAgentProperty   UserAgentProperty = "MAJOR"
-	MinorUserAgentProperty   UserAgentProperty = "MINOR"
-	PatchUserAgentProperty   UserAgentProperty = "PATCH"
-	OSUserAgentProperty      UserAgentProperty = "OS"
-	OSNameUserAgentProperty  UserAgentProperty = "OS_NAME"
-	OSMajorUserAgentProperty UserAgentProperty = "OS_MAJOR"
-	OSMinorUserAgentProperty UserAgentProperty = "OS_MINOR"
-	DeviceUserAgentProperty  UserAgentProperty = "DEVICE"
-	BuildUserAgentProperty   UserAgentProperty = "BUILD"
+	NameUserAgentProperty     UserAgentProperty = "name"
+	OSUserAgentProperty       UserAgentProperty = "os"
+	DeviceUserAgentProperty   UserAgentProperty = "device"
+	OriginalUserAgentProperty UserAgentProperty = "original"
+	VersionUserAgentProperty  UserAgentProperty = "version"
 )
 
 // Type aliases.
@@ -230,6 +225,7 @@ type DotExpanderProcessor struct {
 	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`         // Handle failures for the processor.
 	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                       // Identifier for the processor. Useful for debugging and metrics.
 	Field         Field                `json:"field" yaml:"field"`                                       // The field to expand into an object field. If set to `*`, all top-level fields will be expanded. Required.
+	Override      *bool                `json:"override,omitempty" yaml:"override,omitempty"`             // Controls the behavior when there is already an existing nested object that conflicts with the expanded field. When `false`, the processor will merge conflicts by combining the old and the new values into an array. When `true`, the value from the expanded field will overwrite the existing value.
 	Path          *string              `json:"path,omitempty" yaml:"path,omitempty"`                     // The field that contains the field to expand. Only required if the field to expand is part another object field, because the `field` option can only understand leaf fields.
 }
 
@@ -294,17 +290,18 @@ type GeoGridProcessor struct {
 }
 
 type GeoIpProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"` // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`         // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                       // Identifier for the processor. Useful for debugging and metrics.
-	DatabaseFile  *string              `json:"database_file,omitempty" yaml:"database_file,omitempty"`   // The database filename referring to a database the module ships with (GeoLite2-City.mmdb, GeoLite2-Country.mmdb, or GeoLite2-ASN.mmdb) or a custom database in the ingest-geoip config directory.
-	Field         Field                `json:"field" yaml:"field"`                                       // The field to get the ip address from for the geographical lookup. Required.
-	FirstOnly     *bool                `json:"first_only,omitempty" yaml:"first_only,omitempty"`         // If `true`, only the first found geoip data will be returned, even if the field contains an array.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
-	Properties    []string             `json:"properties,omitempty" yaml:"properties,omitempty"`         // Controls what properties are added to the `target_field` based on the geoip lookup.
-	TargetField   *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`     // The field that will hold the geographical information looked up from the MaxMind database.
+	Description                        *string              `json:"description,omitempty" yaml:"description,omitempty"`                                                       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
+	If                                 *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                                         // Conditionally execute the processor.
+	IgnoreFailure                      *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                                 // Ignore failures for the processor.
+	OnFailure                          []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                                         // Handle failures for the processor.
+	Tag                                *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                                       // Identifier for the processor. Useful for debugging and metrics.
+	DatabaseFile                       *string              `json:"database_file,omitempty" yaml:"database_file,omitempty"`                                                   // The database filename referring to a database the module ships with (GeoLite2-City.mmdb, GeoLite2-Country.mmdb, or GeoLite2-ASN.mmdb) or a custom database in the ingest-geoip config directory.
+	Field                              Field                `json:"field" yaml:"field"`                                                                                       // The field to get the ip address from for the geographical lookup. Required.
+	FirstOnly                          *bool                `json:"first_only,omitempty" yaml:"first_only,omitempty"`                                                         // If `true`, only the first found geoip data will be returned, even if the field contains an array.
+	IgnoreMissing                      *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"`                                                 // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
+	Properties                         []string             `json:"properties,omitempty" yaml:"properties,omitempty"`                                                         // Controls what properties are added to the `target_field` based on the geoip lookup.
+	TargetField                        *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`                                                     // The field that will hold the geographical information looked up from the MaxMind database.
+	DownloadDatabaseOnPipelineCreation *bool                `json:"download_database_on_pipeline_creation,omitempty" yaml:"download_database_on_pipeline_creation,omitempty"` // If `true` (and if `ingest.geoip.downloader.eager.download` is `false`), the missing database is downloaded when the pipeline is created. Else, the download is triggered by when the pipeline is used as the `default_pipeline` or `final_pipeline` in an index.
 }
 
 type GrokProcessor struct {
@@ -433,6 +430,7 @@ type Pipeline struct {
 	OnFailure   []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`   // Processors to run immediately after a processor failure.
 	Processors  []ProcessorContainer `json:"processors,omitempty" yaml:"processors,omitempty"`   // Processors used to perform transformations on documents before indexing. Processors run sequentially in the order specified.
 	Version     *VersionNumber       `json:"version,omitempty" yaml:"version,omitempty"`         // Version number used by external systems to track ingest pipelines.
+	Deprecated  *bool                `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`   // Marks this ingest pipeline as deprecated. When a deprecated ingest pipeline is referenced as the default or final pipeline when creating or updating a non-deprecated index template, Elasticsearch will emit a deprecation warning.
 	Meta        *Metadata            `json:"_meta,omitempty" yaml:"_meta,omitempty"`             // Arbitrary metadata about the ingest pipeline. This map is not automatically generated by Elasticsearch.
 }
 
@@ -627,14 +625,15 @@ type UrlDecodeProcessor struct {
 }
 
 type UserAgentProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"` // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`         // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                       // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                       // The field containing the user agent string. Required.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
-	Options       []UserAgentProperty  `json:"options,omitempty" yaml:"options,omitempty"`
-	RegexFile     *string              `json:"regex_file,omitempty" yaml:"regex_file,omitempty"`     // The name of the file in the `config/ingest-user-agent` directory containing the regular expressions for parsing the user agent string. Both the directory and the file have to be created before starting Elasticsearch. If not specified, ingest-user-agent will use the `regexes.yaml` from uap-core it ships with.
-	TargetField   *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"` // The field that will be filled with the user agent details.
+	Description       *string              `json:"description,omitempty" yaml:"description,omitempty"`                 // Description of the processor. Useful for describing the purpose of the processor or its configuration.
+	If                *string              `json:"if,omitempty" yaml:"if,omitempty"`                                   // Conditionally execute the processor.
+	IgnoreFailure     *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`           // Ignore failures for the processor.
+	OnFailure         []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                   // Handle failures for the processor.
+	Tag               *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                 // Identifier for the processor. Useful for debugging and metrics.
+	Field             Field                `json:"field" yaml:"field"`                                                 // The field containing the user agent string. Required.
+	IgnoreMissing     *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"`           // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
+	RegexFile         *string              `json:"regex_file,omitempty" yaml:"regex_file,omitempty"`                   // The name of the file in the `config/ingest-user-agent` directory containing the regular expressions for parsing the user agent string. Both the directory and the file have to be created before starting Elasticsearch. If not specified, ingest-user-agent will use the `regexes.yaml` from uap-core it ships with.
+	TargetField       *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`               // The field that will be filled with the user agent details.
+	Properties        []UserAgentProperty  `json:"properties,omitempty" yaml:"properties,omitempty"`                   // Controls what properties are added to `target_field`.
+	ExtractDeviceType *bool                `json:"extract_device_type,omitempty" yaml:"extract_device_type,omitempty"` // Extracts device type from the user agent string on a best-effort basis.
 }
