@@ -92,6 +92,7 @@ const (
 type (
 	Field         string
 	Fields        any
+	GrokPattern   string
 	Id            string
 	Metadata      map[string]any
 	Name          string
@@ -313,7 +314,7 @@ type GrokProcessor struct {
 	Field              Field                `json:"field" yaml:"field"`                                                 // The field to use for grok expression parsing. Required.
 	IgnoreMissing      *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"`           // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
 	PatternDefinitions map[string]string    `json:"pattern_definitions,omitempty" yaml:"pattern_definitions,omitempty"` // A map of pattern-name and pattern tuples defining custom patterns to be used by the current processor. Patterns matching existing names will override the pre-existing definition.
-	Patterns           []string             `json:"patterns" yaml:"patterns"`                                           // An ordered list of grok expression to match and extract named captures with. Returns on the first expression in the list that matches. Required.
+	Patterns           []GrokPattern        `json:"patterns" yaml:"patterns"`                                           // An ordered list of grok expression to match and extract named captures with. Returns on the first expression in the list that matches. Required.
 	TraceMatch         *bool                `json:"trace_match,omitempty" yaml:"trace_match,omitempty"`                 // When `true`, `_ingest._grok_match_index` will be inserted into your matched document’s metadata with the index into the pattern found in `patterns` that matched.
 }
 
@@ -470,6 +471,7 @@ type ProcessorContainer struct {
 	KV              *KeyValueProcessor        `json:"kv,omitempty" yaml:"kv,omitempty"`                               // This processor helps automatically parse messages (or specific event fields) which are of the `foo=bar` variety.
 	Lowercase       *LowercaseProcessor       `json:"lowercase,omitempty" yaml:"lowercase,omitempty"`                 // Converts a string to its lowercase equivalent. If the field is an array of strings, all members of the array will be converted.
 	Pipeline        *PipelineProcessor        `json:"pipeline,omitempty" yaml:"pipeline,omitempty"`                   // Executes another pipeline.
+	Redact          *RedactProcessor          `json:"redact,omitempty" yaml:"redact,omitempty"`                       // The Redact processor uses the Grok rules engine to obscure text in the input document matching the given Grok patterns. The processor can be used to obscure Personal Identifying Information (PII) by configuring it to detect known patterns such as email or IP addresses. Text that matches a Grok pattern is replaced with a configurable string such as `<EMAIL>` where an email address is matched or simply replace all matches with the text `<REDACTED>` if preferred.
 	Remove          *RemoveProcessor          `json:"remove,omitempty" yaml:"remove,omitempty"`                       // Removes existing fields. If one field doesn’t exist, an exception will be thrown.
 	Rename          *RenameProcessor          `json:"rename,omitempty" yaml:"rename,omitempty"`                       // Renames an existing field. If the field doesn’t exist or the new name is already used, an exception will be thrown.
 	Reroute         *RerouteProcessor         `json:"reroute,omitempty" yaml:"reroute,omitempty"`                     // Routes a document to another target index or data stream. When setting the `destination` option, the target is explicitly specified and the dataset and namespace options can’t be set. When the `destination` option is not set, this processor is in a data stream mode. Note that in this mode, the reroute processor can only be used on data streams that follow the data stream naming scheme.
@@ -483,6 +485,21 @@ type ProcessorContainer struct {
 	URLDecode       *UrlDecodeProcessor       `json:"urldecode,omitempty" yaml:"urldecode,omitempty"`                 // URL-decodes a string. If the field is an array of strings, all members of the array will be decoded.
 	URIParts        *UriPartsProcessor        `json:"uri_parts,omitempty" yaml:"uri_parts,omitempty"`                 // Parses a Uniform Resource Identifier (URI) string and extracts its components as an object. This URI object includes properties for the URI’s domain, path, fragment, port, query, scheme, user info, username, and password.
 	UserAgent       *UserAgentProcessor       `json:"user_agent,omitempty" yaml:"user_agent,omitempty"`               // The `user_agent` processor extracts details from the user agent string a browser sends with its web requests. This processor adds this information by default under the `user_agent` field.
+}
+
+type RedactProcessor struct {
+	Description        *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
+	If                 *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
+	IgnoreFailure      *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"` // Ignore failures for the processor.
+	OnFailure          []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`         // Handle failures for the processor.
+	Tag                *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                       // Identifier for the processor. Useful for debugging and metrics.
+	Field              Field                `json:"field" yaml:"field"`                                       // The field to be redacted. Required.
+	Patterns           []GrokPattern        `json:"patterns" yaml:"patterns"`                                 // A list of grok expressions to match and redact named captures with. Required.
+	PatternDefinitions map[string]string    `json:"pattern_definitions,omitempty" yaml:"pattern_definitions,omitempty"`
+	Prefix             *string              `json:"prefix,omitempty" yaml:"prefix,omitempty"`                         // Start a redacted section with this token.
+	Suffix             *string              `json:"suffix,omitempty" yaml:"suffix,omitempty"`                         // End a redacted section with this token.
+	IgnoreMissing      *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"`         // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
+	SkipIfUnlicensed   *bool                `json:"skip_if_unlicensed,omitempty" yaml:"skip_if_unlicensed,omitempty"` // If `true` and the current license does not support running redact processors, then the processor quietly exits without modifying the document.
 }
 
 type RemoveProcessor struct {

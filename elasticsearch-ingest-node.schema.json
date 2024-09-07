@@ -1503,6 +1503,10 @@
           "$ref": "#/$defs/PipelineProcessor",
           "description": "Executes another pipeline."
         },
+        "redact": {
+          "$ref": "#/$defs/RedactProcessor",
+          "description": "The Redact processor uses the Grok rules engine to obscure text in the input document matching the given Grok patterns. The processor can be used to obscure Personal Identifying Information (PII) by configuring it to detect known patterns such as email or IP addresses. Text that matches a Grok pattern is replaced with a configurable string such as `\u003cEMAIL\u003e` where an email address is matched or simply replace all matches with the text `\u003cREDACTED\u003e` if preferred."
+        },
         "remove": {
           "$ref": "#/$defs/RemoveProcessor",
           "description": "Removes existing fields. If one field doesn’t exist, an exception will be thrown."
@@ -1558,6 +1562,72 @@
       },
       "additionalProperties": false,
       "type": "object"
+    },
+    "RedactProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to be redacted. Required."
+        },
+        "patterns": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "A list of grok expressions to match and redact named captures with. Required."
+        },
+        "pattern_definitions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "prefix": {
+          "type": "string",
+          "description": "Start a redacted section with this token."
+        },
+        "suffix": {
+          "type": "string",
+          "description": "End a redacted section with this token."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document."
+        },
+        "skip_if_unlicensed": {
+          "type": "boolean",
+          "description": "If `true` and the current license does not support running redact processors, then the processor quietly exits without modifying the document."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field",
+        "patterns"
+      ]
     },
     "RemoveProcessor": {
       "properties": {
