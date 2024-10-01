@@ -1620,6 +1620,10 @@
         "skip_if_unlicensed": {
           "type": "boolean",
           "description": "If `true` and the current license does not support running redact processors, then the processor quietly exits without modifying the document."
+        },
+        "trace_redact": {
+          "type": "boolean",
+          "description": "If `true` then ingest metadata `_ingest._redact._is_redacted` is set to `true` if the document has been redacted."
         }
       },
       "additionalProperties": false,

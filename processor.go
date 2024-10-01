@@ -500,6 +500,7 @@ type RedactProcessor struct {
 	Suffix             *string              `json:"suffix,omitempty" yaml:"suffix,omitempty"`                         // End a redacted section with this token.
 	IgnoreMissing      *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"`         // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
 	SkipIfUnlicensed   *bool                `json:"skip_if_unlicensed,omitempty" yaml:"skip_if_unlicensed,omitempty"` // If `true` and the current license does not support running redact processors, then the processor quietly exits without modifying the document.
+	TraceRedact        *bool                `json:"trace_redact,omitempty" yaml:"trace_redact,omitempty"`             // If `true` then ingest metadata `_ingest._redact._is_redacted` is set to `true` if the document has been redacted.
 }
 
 type RemoveProcessor struct {
