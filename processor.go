@@ -480,6 +480,7 @@ type ProcessorContainer struct {
 	SetSecurityUser *SetSecurityUserProcessor `json:"set_security_user,omitempty" yaml:"set_security_user,omitempty"` // Sets user-related details (such as `username`, `roles`, `email`, `full_name`, `metadata`, `api_key`, `realm` and `authentication_type`) from the current authenticated user to the current document by pre-processing the ingest.
 	Sort            *SortProcessor            `json:"sort,omitempty" yaml:"sort,omitempty"`                           // Sorts the elements of an array ascending or descending. Homogeneous arrays of numbers will be sorted numerically, while arrays of strings or heterogeneous arrays of strings + numbers will be sorted lexicographically. Throws an error when the field is not an array.
 	Split           *SplitProcessor           `json:"split,omitempty" yaml:"split,omitempty"`                         // Splits a field into an array using a separator character. Only works on string fields.
+	Terminate       *TerminateProcessor       `json:"terminate,omitempty" yaml:"terminate,omitempty"`                 // Terminates the current ingest pipeline, causing no further processors to be run. This will normally be executed conditionally, using the `if` option.
 	Trim            *TrimProcessor            `json:"trim,omitempty" yaml:"trim,omitempty"`                           // Trims whitespace from a field. If the field is an array of strings, all members of the array will be trimmed. This only works on leading and trailing whitespace.
 	Uppercase       *UppercaseProcessor       `json:"uppercase,omitempty" yaml:"uppercase,omitempty"`                 // Converts a string to its uppercase equivalent. If the field is an array of strings, all members of the array will be converted.
 	URLDecode       *UrlDecodeProcessor       `json:"urldecode,omitempty" yaml:"urldecode,omitempty"`                 // URL-decodes a string. If the field is an array of strings, all members of the array will be decoded.
@@ -594,6 +595,14 @@ type SplitProcessor struct {
 	PreserveTrailing *bool                `json:"preserve_trailing,omitempty" yaml:"preserve_trailing,omitempty"` // Preserves empty trailing fields, if any.
 	Separator        string               `json:"separator" yaml:"separator"`                                     // A regex which matches the separator, for example, `,` or `\s+`. Required.
 	TargetField      *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`           // The field to assign the split value to. By default, the field is updated in-place.
+}
+
+type TerminateProcessor struct {
+	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
+	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
+	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"` // Ignore failures for the processor.
+	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`         // Handle failures for the processor.
+	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                       // Identifier for the processor. Useful for debugging and metrics.
 }
 
 type TrimProcessor struct {

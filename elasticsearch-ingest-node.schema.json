@@ -1539,6 +1539,10 @@
           "$ref": "#/$defs/SplitProcessor",
           "description": "Splits a field into an array using a separator character. Only works on string fields."
         },
+        "terminate": {
+          "$ref": "#/$defs/TerminateProcessor",
+          "description": "Terminates the current ingest pipeline, causing no further processors to be run. This will normally be executed conditionally, using the `if` option."
+        },
         "trim": {
           "$ref": "#/$defs/TrimProcessor",
           "description": "Trims whitespace from a field. If the field is an array of strings, all members of the array will be trimmed. This only works on leading and trailing whitespace."
@@ -1998,6 +2002,35 @@
         "field",
         "separator"
       ]
+    },
+    "TerminateProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
     },
     "TrimProcessor": {
       "properties": {
