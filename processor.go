@@ -25,11 +25,22 @@ type ConvertType string
 const (
 	IntegerConvertType ConvertType = "integer"
 	LongConvertType    ConvertType = "long"
-	FloatConvertType   ConvertType = "float"
 	DoubleConvertType  ConvertType = "double"
-	StringConvertType  ConvertType = "string"
+	FloatConvertType   ConvertType = "float"
 	BooleanConvertType ConvertType = "boolean"
+	IPConvertType      ConvertType = "ip"
+	StringConvertType  ConvertType = "string"
 	AutoConvertType    ConvertType = "auto"
+)
+
+type FingerprintDigest string
+
+const (
+	Md5FingerprintDigest         FingerprintDigest = "MD5"
+	Sha1FingerprintDigest        FingerprintDigest = "SHA-1"
+	Sha256FingerprintDigest      FingerprintDigest = "SHA-256"
+	Sha512FingerprintDigest      FingerprintDigest = "SHA-512"
+	Murmurhash3FingerprintDigest FingerprintDigest = "MurmurHash3"
 )
 
 type GeoGridTargetFormat string
@@ -152,6 +163,25 @@ type CircleProcessor struct {
 	TargetField   *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`     // The field to assign the polygon shape to By default, the field is updated in-place.
 }
 
+type CommunityIDProcessor struct {
+	Description     *string              `json:"description,omitempty" yaml:"description,omitempty"`           // Description of the processor. Useful for describing the purpose of the processor or its configuration.
+	If              *string              `json:"if,omitempty" yaml:"if,omitempty"`                             // Conditionally execute the processor.
+	IgnoreFailure   *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`     // Ignore failures for the processor.
+	OnFailure       []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`             // Handle failures for the processor.
+	Tag             *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                           // Identifier for the processor. Useful for debugging and metrics.
+	SourceIP        *Field               `json:"source_ip,omitempty" yaml:"source_ip,omitempty"`               // Field containing the source IP address.
+	SourcePort      *Field               `json:"source_port,omitempty" yaml:"source_port,omitempty"`           // Field containing the source port.
+	DestinationIP   *Field               `json:"destination_ip,omitempty" yaml:"destination_ip,omitempty"`     // Field containing the destination IP address.
+	DestinationPort *Field               `json:"destination_port,omitempty" yaml:"destination_port,omitempty"` // Field containing the destination port.
+	IANANumber      *Field               `json:"iana_number,omitempty" yaml:"iana_number,omitempty"`           // Field containing the IANA number.
+	ICMPType        *Field               `json:"icmp_type,omitempty" yaml:"icmp_type,omitempty"`               // Field containing the ICMP type.
+	ICMPCode        *Field               `json:"icmp_code,omitempty" yaml:"icmp_code,omitempty"`               // Field containing the ICMP code.
+	Transport       *Field               `json:"transport,omitempty" yaml:"transport,omitempty"`               // Field containing the transport protocol name or number. Used only when the iana_number field is not present. The following protocol names are currently supported: eigrp, gre, icmp, icmpv6, igmp, ipv6-icmp, ospf, pim, sctp, tcp, udp.
+	TargetField     *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`         // Output field for the community ID.
+	Seed            *int32               `json:"seed,omitempty" yaml:"seed,omitempty"`                         // Seed for the community ID hash. Must be between 0 and 65535 (inclusive). The seed can prevent hash collisions between network domains, such as a staging and production network that use the same addressing scheme.
+	IgnoreMissing   *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"`     // If true and any required fields are missing, the processor quietly exits without modifying the document.
+}
+
 type ConvertProcessor struct {
 	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
 	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
@@ -205,6 +235,7 @@ type DateProcessor struct {
 	Locale        *string              `json:"locale,omitempty" yaml:"locale,omitempty"`                 // The locale to use when parsing the date, relevant when parsing month names or week days. Supports template snippets.
 	TargetField   *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`     // The field that will hold the parsed date.
 	Timezone      *string              `json:"timezone,omitempty" yaml:"timezone,omitempty"`             // The timezone to use when parsing the date. Supports template snippets.
+	OutputFormat  *string              `json:"output_format,omitempty" yaml:"output_format,omitempty"`   // The format to use when writing the date to target_field. Must be a valid java time pattern.
 }
 
 type DissectProcessor struct {
@@ -262,6 +293,19 @@ type FailProcessor struct {
 	Message       string               `json:"message" yaml:"message"`                                   // The error message thrown by the processor. Supports template snippets. Required.
 }
 
+type FingerprintProcessor struct {
+	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
+	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
+	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"` // Ignore failures for the processor.
+	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`         // Handle failures for the processor.
+	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                       // Identifier for the processor. Useful for debugging and metrics.
+	Fields        Fields               `json:"fields" yaml:"fields"`                                     // Array of fields to include in the fingerprint. For objects, the processor hashes both the field key and value. For other fields, the processor hashes only the field value. Required.
+	TargetField   *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`     // Output field for the fingerprint.
+	Salt          *string              `json:"salt,omitempty" yaml:"salt,omitempty"`                     // Salt value for the hash function.
+	Method        *FingerprintDigest   `json:"method,omitempty" yaml:"method,omitempty"`                 // The hash method used to compute the fingerprint. Must be one of MD5, SHA-1, SHA-256, SHA-512, or MurmurHash3.
+	IgnoreMissing *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"` // If true, the processor ignores any missing fields. If all fields are missing, the processor silently exits without modifying the document.
+}
+
 type ForeachProcessor struct {
 	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
 	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
@@ -311,6 +355,7 @@ type GrokProcessor struct {
 	IgnoreFailure      *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`           // Ignore failures for the processor.
 	OnFailure          []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                   // Handle failures for the processor.
 	Tag                *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                 // Identifier for the processor. Useful for debugging and metrics.
+	EcsCompatibility   *string              `json:"ecs_compatibility,omitempty" yaml:"ecs_compatibility,omitempty"`     // Must be disabled or v1. If v1, the processor uses patterns with Elastic Common Schema (ECS) field names.
 	Field              Field                `json:"field" yaml:"field"`                                                 // The field to use for grok expression parsing. Required.
 	IgnoreMissing      *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"`           // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
 	PatternDefinitions map[string]string    `json:"pattern_definitions,omitempty" yaml:"pattern_definitions,omitempty"` // A map of pattern-name and pattern tuples defining custom patterns to be used by the current processor. Patterns matching existing names will override the pre-existing definition.
@@ -426,6 +471,20 @@ type LowercaseProcessor struct {
 	TargetField   *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`     // The field to assign the converted value to. By default, the field is updated in-place.
 }
 
+type NetworkDirectionProcessor struct {
+	Description           *string              `json:"description,omitempty" yaml:"description,omitempty"`                         // Description of the processor. Useful for describing the purpose of the processor or its configuration.
+	If                    *string              `json:"if,omitempty" yaml:"if,omitempty"`                                           // Conditionally execute the processor.
+	IgnoreFailure         *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                   // Ignore failures for the processor.
+	OnFailure             []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                           // Handle failures for the processor.
+	Tag                   *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                         // Identifier for the processor. Useful for debugging and metrics.
+	SourceIP              *Field               `json:"source_ip,omitempty" yaml:"source_ip,omitempty"`                             // Field containing the source IP address.
+	DestinationIP         *Field               `json:"destination_ip,omitempty" yaml:"destination_ip,omitempty"`                   // Field containing the destination IP address.
+	TargetField           *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`                       // Output field for the network direction.
+	InternalNetworks      []string             `json:"internal_networks,omitempty" yaml:"internal_networks,omitempty"`             // List of internal networks. Supports IPv4 and IPv6 addresses and ranges in CIDR notation. Also supports the named ranges listed below. These may be constructed with template snippets. Must specify only one of internal_networks or internal_networks_field.
+	InternalNetworksField *Field               `json:"internal_networks_field,omitempty" yaml:"internal_networks_field,omitempty"` // A field on the given document to read the internal_networks configuration from.
+	IgnoreMissing         *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"`                   // If true and any required fields are missing, the processor quietly exits without modifying the document.
+}
+
 type Pipeline struct {
 	Description *string              `json:"description,omitempty" yaml:"description,omitempty"` // Description of the ingest pipeline.
 	OnFailure   []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`   // Processors to run immediately after a processor failure.
@@ -446,46 +505,50 @@ type PipelineProcessor struct {
 }
 
 type ProcessorContainer struct {
-	Append          *AppendProcessor          `json:"append,omitempty" yaml:"append,omitempty"`                       // Appends one or more values to an existing array if the field already exists and it is an array. Converts a scalar to an array and appends one or more values to it if the field exists and it is a scalar. Creates an array containing the provided values if the field doesn’t exist. Accepts a single value or an array of values.
-	Attachment      *AttachmentProcessor      `json:"attachment,omitempty" yaml:"attachment,omitempty"`               // The attachment processor lets Elasticsearch extract file attachments in common formats (such as PPT, XLS, and PDF) by using the Apache text extraction library Tika.
-	Bytes           *BytesProcessor           `json:"bytes,omitempty" yaml:"bytes,omitempty"`                         // Converts a human readable byte value (for example `1kb`) to its value in bytes (for example `1024`). If the field is an array of strings, all members of the array will be converted. Supported human readable units are "b", "kb", "mb", "gb", "tb", "pb" case insensitive. An error will occur if the field is not a supported format or resultant value exceeds 2^63.
-	Circle          *CircleProcessor          `json:"circle,omitempty" yaml:"circle,omitempty"`                       // Converts circle definitions of shapes to regular polygons which approximate them.
-	Convert         *ConvertProcessor         `json:"convert,omitempty" yaml:"convert,omitempty"`                     // Converts a field in the currently ingested document to a different type, such as converting a string to an integer. If the field value is an array, all members will be converted.
-	CSV             *CsvProcessor             `json:"csv,omitempty" yaml:"csv,omitempty"`                             // Extracts fields from CSV line out of a single text field within a document. Any empty field in CSV will be skipped.
-	Date            *DateProcessor            `json:"date,omitempty" yaml:"date,omitempty"`                           // Parses dates from fields, and then uses the date or timestamp as the timestamp for the document.
-	DateIndexName   *DateIndexNameProcessor   `json:"date_index_name,omitempty" yaml:"date_index_name,omitempty"`     // The purpose of this processor is to point documents to the right time based index based on a date or timestamp field in a document by using the date math index name support.
-	Dissect         *DissectProcessor         `json:"dissect,omitempty" yaml:"dissect,omitempty"`                     // Extracts structured fields out of a single text field by matching the text field against a delimiter-based pattern.
-	DotExpander     *DotExpanderProcessor     `json:"dot_expander,omitempty" yaml:"dot_expander,omitempty"`           // Expands a field with dots into an object field. This processor allows fields with dots in the name to be accessible by other processors in the pipeline. Otherwise these fields can’t be accessed by any processor.
-	Drop            *DropProcessor            `json:"drop,omitempty" yaml:"drop,omitempty"`                           // Drops the document without raising any errors. This is useful to prevent the document from getting indexed based on some condition.
-	Enrich          *EnrichProcessor          `json:"enrich,omitempty" yaml:"enrich,omitempty"`                       // The `enrich` processor can enrich documents with data from another index.
-	Fail            *FailProcessor            `json:"fail,omitempty" yaml:"fail,omitempty"`                           // Raises an exception. This is useful for when you expect a pipeline to fail and want to relay a specific message to the requester.
-	Foreach         *ForeachProcessor         `json:"foreach,omitempty" yaml:"foreach,omitempty"`                     // Runs an ingest processor on each element of an array or object.
-	GeoGrid         *GeoGridProcessor         `json:"geo_grid,omitempty" yaml:"geo_grid,omitempty"`                   // Converts geo-grid definitions of grid tiles or cells to regular bounding boxes or polygons which describe their shape. This is useful if there is a need to interact with the tile shapes as spatially indexable fields.
-	Geoip           *GeoIpProcessor           `json:"geoip,omitempty" yaml:"geoip,omitempty"`                         // The `geoip` processor adds information about the geographical location of an IPv4 or IPv6 address.
-	Grok            *GrokProcessor            `json:"grok,omitempty" yaml:"grok,omitempty"`                           // Extracts structured fields out of a single text field within a document. You choose which field to extract matched fields from, as well as the grok pattern you expect will match. A grok pattern is like a regular expression that supports aliased expressions that can be reused.
-	Gsub            *GsubProcessor            `json:"gsub,omitempty" yaml:"gsub,omitempty"`                           // Converts a string field by applying a regular expression and a replacement. If the field is an array of string, all members of the array will be converted. If any non-string values are encountered, the processor will throw an exception.
-	HtmlStrip       *HtmlStripProcessor       `json:"html_strip,omitempty" yaml:"html_strip,omitempty"`               // Removes HTML tags from the field. If the field is an array of strings, HTML tags will be removed from all members of the array.
-	Inference       *InferenceProcessor       `json:"inference,omitempty" yaml:"inference,omitempty"`                 // Uses a pre-trained data frame analytics model or a model deployed for natural language processing tasks to infer against the data that is being ingested in the pipeline.
-	Join            *JoinProcessor            `json:"join,omitempty" yaml:"join,omitempty"`                           // Joins each element of an array into a single string using a separator character between each element. Throws an error when the field is not an array.
-	JSON            *JsonProcessor            `json:"json,omitempty" yaml:"json,omitempty"`                           // Converts a JSON string into a structured JSON object.
-	KV              *KeyValueProcessor        `json:"kv,omitempty" yaml:"kv,omitempty"`                               // This processor helps automatically parse messages (or specific event fields) which are of the `foo=bar` variety.
-	Lowercase       *LowercaseProcessor       `json:"lowercase,omitempty" yaml:"lowercase,omitempty"`                 // Converts a string to its lowercase equivalent. If the field is an array of strings, all members of the array will be converted.
-	Pipeline        *PipelineProcessor        `json:"pipeline,omitempty" yaml:"pipeline,omitempty"`                   // Executes another pipeline.
-	Redact          *RedactProcessor          `json:"redact,omitempty" yaml:"redact,omitempty"`                       // The Redact processor uses the Grok rules engine to obscure text in the input document matching the given Grok patterns. The processor can be used to obscure Personal Identifying Information (PII) by configuring it to detect known patterns such as email or IP addresses. Text that matches a Grok pattern is replaced with a configurable string such as `<EMAIL>` where an email address is matched or simply replace all matches with the text `<REDACTED>` if preferred.
-	Remove          *RemoveProcessor          `json:"remove,omitempty" yaml:"remove,omitempty"`                       // Removes existing fields. If one field doesn’t exist, an exception will be thrown.
-	Rename          *RenameProcessor          `json:"rename,omitempty" yaml:"rename,omitempty"`                       // Renames an existing field. If the field doesn’t exist or the new name is already used, an exception will be thrown.
-	Reroute         *RerouteProcessor         `json:"reroute,omitempty" yaml:"reroute,omitempty"`                     // Routes a document to another target index or data stream. When setting the `destination` option, the target is explicitly specified and the dataset and namespace options can’t be set. When the `destination` option is not set, this processor is in a data stream mode. Note that in this mode, the reroute processor can only be used on data streams that follow the data stream naming scheme.
-	Script          *ScriptProcessor          `json:"script,omitempty" yaml:"script,omitempty"`                       // Runs an inline or stored script on incoming documents. The script runs in the `ingest` context.
-	Set             *SetProcessor             `json:"set,omitempty" yaml:"set,omitempty"`                             // Adds a field with the specified value. If the field already exists, its value will be replaced with the provided one.
-	SetSecurityUser *SetSecurityUserProcessor `json:"set_security_user,omitempty" yaml:"set_security_user,omitempty"` // Sets user-related details (such as `username`, `roles`, `email`, `full_name`, `metadata`, `api_key`, `realm` and `authentication_type`) from the current authenticated user to the current document by pre-processing the ingest.
-	Sort            *SortProcessor            `json:"sort,omitempty" yaml:"sort,omitempty"`                           // Sorts the elements of an array ascending or descending. Homogeneous arrays of numbers will be sorted numerically, while arrays of strings or heterogeneous arrays of strings + numbers will be sorted lexicographically. Throws an error when the field is not an array.
-	Split           *SplitProcessor           `json:"split,omitempty" yaml:"split,omitempty"`                         // Splits a field into an array using a separator character. Only works on string fields.
-	Terminate       *TerminateProcessor       `json:"terminate,omitempty" yaml:"terminate,omitempty"`                 // Terminates the current ingest pipeline, causing no further processors to be run. This will normally be executed conditionally, using the `if` option.
-	Trim            *TrimProcessor            `json:"trim,omitempty" yaml:"trim,omitempty"`                           // Trims whitespace from a field. If the field is an array of strings, all members of the array will be trimmed. This only works on leading and trailing whitespace.
-	Uppercase       *UppercaseProcessor       `json:"uppercase,omitempty" yaml:"uppercase,omitempty"`                 // Converts a string to its uppercase equivalent. If the field is an array of strings, all members of the array will be converted.
-	URLDecode       *UrlDecodeProcessor       `json:"urldecode,omitempty" yaml:"urldecode,omitempty"`                 // URL-decodes a string. If the field is an array of strings, all members of the array will be decoded.
-	URIParts        *UriPartsProcessor        `json:"uri_parts,omitempty" yaml:"uri_parts,omitempty"`                 // Parses a Uniform Resource Identifier (URI) string and extracts its components as an object. This URI object includes properties for the URI’s domain, path, fragment, port, query, scheme, user info, username, and password.
-	UserAgent       *UserAgentProcessor       `json:"user_agent,omitempty" yaml:"user_agent,omitempty"`               // The `user_agent` processor extracts details from the user agent string a browser sends with its web requests. This processor adds this information by default under the `user_agent` field.
+	Append           *AppendProcessor           `json:"append,omitempty" yaml:"append,omitempty"`                       // Appends one or more values to an existing array if the field already exists and it is an array. Converts a scalar to an array and appends one or more values to it if the field exists and it is a scalar. Creates an array containing the provided values if the field doesn’t exist. Accepts a single value or an array of values.
+	Attachment       *AttachmentProcessor       `json:"attachment,omitempty" yaml:"attachment,omitempty"`               // The attachment processor lets Elasticsearch extract file attachments in common formats (such as PPT, XLS, and PDF) by using the Apache text extraction library Tika.
+	Bytes            *BytesProcessor            `json:"bytes,omitempty" yaml:"bytes,omitempty"`                         // Converts a human readable byte value (for example `1kb`) to its value in bytes (for example `1024`). If the field is an array of strings, all members of the array will be converted. Supported human readable units are "b", "kb", "mb", "gb", "tb", "pb" case insensitive. An error will occur if the field is not a supported format or resultant value exceeds 2^63.
+	Circle           *CircleProcessor           `json:"circle,omitempty" yaml:"circle,omitempty"`                       // Converts circle definitions of shapes to regular polygons which approximate them.
+	CommunityID      *CommunityIDProcessor      `json:"community_id,omitempty" yaml:"community_id,omitempty"`           // Computes the Community ID for network flow data as defined in the Community ID Specification. You can use a community ID to correlate network events related to a single flow.
+	Convert          *ConvertProcessor          `json:"convert,omitempty" yaml:"convert,omitempty"`                     // Converts a field in the currently ingested document to a different type, such as converting a string to an integer. If the field value is an array, all members will be converted.
+	CSV              *CsvProcessor              `json:"csv,omitempty" yaml:"csv,omitempty"`                             // Extracts fields from CSV line out of a single text field within a document. Any empty field in CSV will be skipped.
+	Date             *DateProcessor             `json:"date,omitempty" yaml:"date,omitempty"`                           // Parses dates from fields, and then uses the date or timestamp as the timestamp for the document.
+	DateIndexName    *DateIndexNameProcessor    `json:"date_index_name,omitempty" yaml:"date_index_name,omitempty"`     // The purpose of this processor is to point documents to the right time based index based on a date or timestamp field in a document by using the date math index name support.
+	Dissect          *DissectProcessor          `json:"dissect,omitempty" yaml:"dissect,omitempty"`                     // Extracts structured fields out of a single text field by matching the text field against a delimiter-based pattern.
+	DotExpander      *DotExpanderProcessor      `json:"dot_expander,omitempty" yaml:"dot_expander,omitempty"`           // Expands a field with dots into an object field. This processor allows fields with dots in the name to be accessible by other processors in the pipeline. Otherwise these fields can’t be accessed by any processor.
+	Drop             *DropProcessor             `json:"drop,omitempty" yaml:"drop,omitempty"`                           // Drops the document without raising any errors. This is useful to prevent the document from getting indexed based on some condition.
+	Enrich           *EnrichProcessor           `json:"enrich,omitempty" yaml:"enrich,omitempty"`                       // The `enrich` processor can enrich documents with data from another index.
+	Fail             *FailProcessor             `json:"fail,omitempty" yaml:"fail,omitempty"`                           // Raises an exception. This is useful for when you expect a pipeline to fail and want to relay a specific message to the requester.
+	Fingerprint      *FingerprintProcessor      `json:"fingerprint,omitempty" yaml:"fingerprint,omitempty"`             // Computes a hash of the document’s content. You can use this hash for content fingerprinting.
+	Foreach          *ForeachProcessor          `json:"foreach,omitempty" yaml:"foreach,omitempty"`                     // Runs an ingest processor on each element of an array or object.
+	GeoGrid          *GeoGridProcessor          `json:"geo_grid,omitempty" yaml:"geo_grid,omitempty"`                   // Converts geo-grid definitions of grid tiles or cells to regular bounding boxes or polygons which describe their shape. This is useful if there is a need to interact with the tile shapes as spatially indexable fields.
+	Geoip            *GeoIpProcessor            `json:"geoip,omitempty" yaml:"geoip,omitempty"`                         // The `geoip` processor adds information about the geographical location of an IPv4 or IPv6 address.
+	Grok             *GrokProcessor             `json:"grok,omitempty" yaml:"grok,omitempty"`                           // Extracts structured fields out of a single text field within a document. You choose which field to extract matched fields from, as well as the grok pattern you expect will match. A grok pattern is like a regular expression that supports aliased expressions that can be reused.
+	Gsub             *GsubProcessor             `json:"gsub,omitempty" yaml:"gsub,omitempty"`                           // Converts a string field by applying a regular expression and a replacement. If the field is an array of string, all members of the array will be converted. If any non-string values are encountered, the processor will throw an exception.
+	HtmlStrip        *HtmlStripProcessor        `json:"html_strip,omitempty" yaml:"html_strip,omitempty"`               // Removes HTML tags from the field. If the field is an array of strings, HTML tags will be removed from all members of the array.
+	Inference        *InferenceProcessor        `json:"inference,omitempty" yaml:"inference,omitempty"`                 // Uses a pre-trained data frame analytics model or a model deployed for natural language processing tasks to infer against the data that is being ingested in the pipeline.
+	Join             *JoinProcessor             `json:"join,omitempty" yaml:"join,omitempty"`                           // Joins each element of an array into a single string using a separator character between each element. Throws an error when the field is not an array.
+	JSON             *JsonProcessor             `json:"json,omitempty" yaml:"json,omitempty"`                           // Converts a JSON string into a structured JSON object.
+	KV               *KeyValueProcessor         `json:"kv,omitempty" yaml:"kv,omitempty"`                               // This processor helps automatically parse messages (or specific event fields) which are of the `foo=bar` variety.
+	Lowercase        *LowercaseProcessor        `json:"lowercase,omitempty" yaml:"lowercase,omitempty"`                 // Converts a string to its lowercase equivalent. If the field is an array of strings, all members of the array will be converted.
+	NetworkDirection *NetworkDirectionProcessor `json:"network_direction,omitempty" yaml:"network_direction,omitempty"` // Calculates the network direction given a source IP address, destination IP address, and a list of internal networks.
+	Pipeline         *PipelineProcessor         `json:"pipeline,omitempty" yaml:"pipeline,omitempty"`                   // Executes another pipeline.
+	Redact           *RedactProcessor           `json:"redact,omitempty" yaml:"redact,omitempty"`                       // The Redact processor uses the Grok rules engine to obscure text in the input document matching the given Grok patterns. The processor can be used to obscure Personal Identifying Information (PII) by configuring it to detect known patterns such as email or IP addresses. Text that matches a Grok pattern is replaced with a configurable string such as `<EMAIL>` where an email address is matched or simply replace all matches with the text `<REDACTED>` if preferred.
+	RegisteredDomain *RegisteredDomainProcessor `json:"registered_domain,omitempty" yaml:"registered_domain,omitempty"` // Extracts the registered domain (also known as the effective top-level domain or eTLD), sub-domain, and top-level domain from a fully qualified domain name (FQDN). Uses the registered domains defined in the Mozilla Public Suffix List.
+	Remove           *RemoveProcessor           `json:"remove,omitempty" yaml:"remove,omitempty"`                       // Removes existing fields. If one field doesn’t exist, an exception will be thrown.
+	Rename           *RenameProcessor           `json:"rename,omitempty" yaml:"rename,omitempty"`                       // Renames an existing field. If the field doesn’t exist or the new name is already used, an exception will be thrown.
+	Reroute          *RerouteProcessor          `json:"reroute,omitempty" yaml:"reroute,omitempty"`                     // Routes a document to another target index or data stream. When setting the `destination` option, the target is explicitly specified and the dataset and namespace options can’t be set. When the `destination` option is not set, this processor is in a data stream mode. Note that in this mode, the reroute processor can only be used on data streams that follow the data stream naming scheme.
+	Script           *ScriptProcessor           `json:"script,omitempty" yaml:"script,omitempty"`                       // Runs an inline or stored script on incoming documents. The script runs in the `ingest` context.
+	Set              *SetProcessor              `json:"set,omitempty" yaml:"set,omitempty"`                             // Adds a field with the specified value. If the field already exists, its value will be replaced with the provided one.
+	SetSecurityUser  *SetSecurityUserProcessor  `json:"set_security_user,omitempty" yaml:"set_security_user,omitempty"` // Sets user-related details (such as `username`, `roles`, `email`, `full_name`, `metadata`, `api_key`, `realm` and `authentication_type`) from the current authenticated user to the current document by pre-processing the ingest.
+	Sort             *SortProcessor             `json:"sort,omitempty" yaml:"sort,omitempty"`                           // Sorts the elements of an array ascending or descending. Homogeneous arrays of numbers will be sorted numerically, while arrays of strings or heterogeneous arrays of strings + numbers will be sorted lexicographically. Throws an error when the field is not an array.
+	Split            *SplitProcessor            `json:"split,omitempty" yaml:"split,omitempty"`                         // Splits a field into an array using a separator character. Only works on string fields.
+	Terminate        *TerminateProcessor        `json:"terminate,omitempty" yaml:"terminate,omitempty"`                 // Terminates the current ingest pipeline, causing no further processors to be run. This will normally be executed conditionally, using the `if` option.
+	Trim             *TrimProcessor             `json:"trim,omitempty" yaml:"trim,omitempty"`                           // Trims whitespace from a field. If the field is an array of strings, all members of the array will be trimmed. This only works on leading and trailing whitespace.
+	Uppercase        *UppercaseProcessor        `json:"uppercase,omitempty" yaml:"uppercase,omitempty"`                 // Converts a string to its uppercase equivalent. If the field is an array of strings, all members of the array will be converted.
+	URLDecode        *UrlDecodeProcessor        `json:"urldecode,omitempty" yaml:"urldecode,omitempty"`                 // URL-decodes a string. If the field is an array of strings, all members of the array will be decoded.
+	URIParts         *UriPartsProcessor         `json:"uri_parts,omitempty" yaml:"uri_parts,omitempty"`                 // Parses a Uniform Resource Identifier (URI) string and extracts its components as an object. This URI object includes properties for the URI’s domain, path, fragment, port, query, scheme, user info, username, and password.
+	UserAgent        *UserAgentProcessor        `json:"user_agent,omitempty" yaml:"user_agent,omitempty"`               // The `user_agent` processor extracts details from the user agent string a browser sends with its web requests. This processor adds this information by default under the `user_agent` field.
 }
 
 type RedactProcessor struct {
@@ -502,6 +565,17 @@ type RedactProcessor struct {
 	IgnoreMissing      *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"`         // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
 	SkipIfUnlicensed   *bool                `json:"skip_if_unlicensed,omitempty" yaml:"skip_if_unlicensed,omitempty"` // If `true` and the current license does not support running redact processors, then the processor quietly exits without modifying the document.
 	TraceRedact        *bool                `json:"trace_redact,omitempty" yaml:"trace_redact,omitempty"`             // If `true` then ingest metadata `_ingest._redact._is_redacted` is set to `true` if the document has been redacted.
+}
+
+type RegisteredDomainProcessor struct {
+	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
+	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
+	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"` // Ignore failures for the processor.
+	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`         // Handle failures for the processor.
+	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                       // Identifier for the processor. Useful for debugging and metrics.
+	Field         Field                `json:"field" yaml:"field"`                                       // Field containing the source FQDN. Required.
+	TargetField   *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`     // Object field containing extracted domain components. If an empty string, the processor adds components to the document’s root.
+	IgnoreMissing *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"` // If true and any required fields are missing, the processor quietly exits without modifying the document.
 }
 
 type RemoveProcessor struct {
