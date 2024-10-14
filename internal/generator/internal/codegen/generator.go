@@ -23,6 +23,7 @@ import (
 	"generator/internal/spec"
 	"io"
 	"slices"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -267,7 +268,7 @@ func (b *Generator) addProperties(g *jen.Group, props []spec.Property) {
 			s.Id("any")
 		}
 
-		s.Tag(structTag(&p))
+		s.Tag(b.structTag(&p))
 		if p.Description != nil {
 			s.Comment(comment(&p))
 		}
@@ -370,19 +371,77 @@ func goIDName(name string) string {
 	return strings.Join(allParts, "")
 }
 
-// structTag returns a struct tag for JSON and YAML
-func structTag(p *spec.Property) map[string]string {
+// structTag returns a struct tag for json, yaml, and jsonschema.
+func (b *Generator) structTag(p *spec.Property) map[string]string {
+	tag := jsonTag(p)
+	tags := map[string]string{
+		"json": tag,
+		"yaml": tag,
+	}
+
+	if tag = b.jsonschemaTag(p); tag != "" {
+		tags["jsonschema"] = tag
+	}
+	return tags
+}
+
+// jsonschemaTag generates the jsonschema struct tag value used by
+// github.com/invopop/jsonschema.
+func (b *Generator) jsonschemaTag(p *spec.Property) string {
+	var tagParts []string
+
+	// Enum values.
+	if p.Type.InstanceOf != nil {
+		if typeInfo, found := b.allTypes[p.Type.TypeName]; found {
+			if enum, ok := typeInfo.Value.(spec.Enum); ok {
+				for _, member := range enum.Members {
+					tagParts = append(tagParts, "enum="+member.Name)
+				}
+			}
+		}
+	}
+
+	// Default value.
+	switch v := p.ServerDefault.(type) {
+	case nil:
+	case string:
+		// Data cleaning.
+		v = trimBalanced(v, '`')
+		v = trimBalanced(v, '"')
+		v = trimBalanced(v, '\'')
+
+		if v != "" && v != "null" {
+			tagParts = append(tagParts, "default="+escapeTagPart(v))
+		}
+	case []any:
+		for _, v := range v {
+			switch v := v.(type) {
+			case string:
+				tagParts = append(tagParts, "default="+escapeTagPart(v))
+			default:
+				panic(fmt.Errorf("unhandled type %T for default found in array for %s", v, p.Name))
+			}
+		}
+	case bool:
+		tagParts = append(tagParts, "default="+strconv.FormatBool(v))
+	case float64:
+		tagParts = append(tagParts, "default="+strconv.FormatFloat(v, 'g', -1, 64))
+	default:
+		panic(fmt.Errorf("unhandled type %T for default found for %s", v, p.Name))
+	}
+
+	return strings.Join(tagParts, ",")
+}
+
+// jsonTag generates the json struct tag value for a property.
+func jsonTag(p *spec.Property) string {
 	tag := p.Name
 	required := p.Required != nil && *p.Required
 
 	if !required {
 		tag += ",omitempty"
 	}
-
-	return map[string]string{
-		"json": tag,
-		"yaml": tag,
-	}
+	return tag
 }
 
 // comment returns the field description with punctuation and information about
@@ -404,4 +463,17 @@ func comment(p *spec.Property) string {
 		sb.WriteString("Required.")
 	}
 	return sb.String()
+}
+
+// trimBalanced removes the leading and trailing character if they are balanced.
+func trimBalanced(s string, c rune) string {
+	if len(s) >= 2 && rune(s[0]) == c && rune(s[len(s)-1]) == c {
+		return s[1 : len(s)-1]
+	}
+	return s
+}
+
+// escapeTagPart escapes commas in struct tag values.
+func escapeTagPart(s string) string {
+	return strings.ReplaceAll(s, ",", `\,`)
 }
