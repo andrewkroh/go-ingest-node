@@ -417,6 +417,21 @@ type InferenceProcessor struct {
 	InferenceConfig *InferenceConfig     `json:"inference_config,omitempty" yaml:"inference_config,omitempty"`                                           // Contains the inference type and its options.
 }
 
+type IpLocationProcessor struct {
+	Description                        *string              `json:"description,omitempty" yaml:"description,omitempty"`                                                       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
+	If                                 *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                                         // Conditionally execute the processor.
+	IgnoreFailure                      *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                                 // Ignore failures for the processor.
+	OnFailure                          []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                                         // Handle failures for the processor.
+	Tag                                *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                                       // Identifier for the processor. Useful for debugging and metrics.
+	DatabaseFile                       *string              `json:"database_file,omitempty" jsonschema:"default=GeoLite2-City.mmdb" yaml:"database_file,omitempty"`           // The database filename referring to a database the module ships with (GeoLite2-City.mmdb, GeoLite2-Country.mmdb, or GeoLite2-ASN.mmdb) or a custom database in the ingest-geoip config directory.
+	Field                              Field                `json:"field" yaml:"field"`                                                                                       // The field to get the ip address from for the geographical lookup. Required.
+	FirstOnly                          *bool                `json:"first_only,omitempty" jsonschema:"default=true" yaml:"first_only,omitempty"`                               // If `true`, only the first found IP location data will be returned, even if the field contains an array.
+	IgnoreMissing                      *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`                      // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
+	Properties                         []string             `json:"properties,omitempty" yaml:"properties,omitempty"`                                                         // Controls what properties are added to the `target_field` based on the IP location lookup.
+	TargetField                        *Field               `json:"target_field,omitempty" jsonschema:"default=geoip" yaml:"target_field,omitempty"`                          // The field that will hold the geographical information looked up from the MaxMind database.
+	DownloadDatabaseOnPipelineCreation *bool                `json:"download_database_on_pipeline_creation,omitempty" yaml:"download_database_on_pipeline_creation,omitempty"` // If `true` (and if `ingest.geoip.downloader.eager.download` is `false`), the missing database is downloaded when the pipeline is created. Else, the download is triggered by when the pipeline is used as the `default_pipeline` or `final_pipeline` in an index.
+}
+
 type JoinProcessor struct {
 	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                              // Description of the processor. Useful for describing the purpose of the processor or its configuration.
 	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                // Conditionally execute the processor.
@@ -521,6 +536,7 @@ type ProcessorContainer struct {
 	Fail             *FailProcessor             `json:"fail,omitempty" yaml:"fail,omitempty"`                           // Raises an exception. This is useful for when you expect a pipeline to fail and want to relay a specific message to the requester.
 	Fingerprint      *FingerprintProcessor      `json:"fingerprint,omitempty" yaml:"fingerprint,omitempty"`             // Computes a hash of the document’s content. You can use this hash for content fingerprinting.
 	Foreach          *ForeachProcessor          `json:"foreach,omitempty" yaml:"foreach,omitempty"`                     // Runs an ingest processor on each element of an array or object.
+	IPLocation       *IpLocationProcessor       `json:"ip_location,omitempty" yaml:"ip_location,omitempty"`             // Currently an undocumented alias for GeoIP Processor.
 	GeoGrid          *GeoGridProcessor          `json:"geo_grid,omitempty" yaml:"geo_grid,omitempty"`                   // Converts geo-grid definitions of grid tiles or cells to regular bounding boxes or polygons which describe their shape. This is useful if there is a need to interact with the tile shapes as spatially indexable fields.
 	Geoip            *GeoIpProcessor            `json:"geoip,omitempty" yaml:"geoip,omitempty"`                         // The `geoip` processor adds information about the geographical location of an IPv4 or IPv6 address.
 	Grok             *GrokProcessor             `json:"grok,omitempty" yaml:"grok,omitempty"`                           // Extracts structured fields out of a single text field within a document. You choose which field to extract matched fields from, as well as the grok pattern you expect will match. A grok pattern is like a regular expression that supports aliased expressions that can be reused.

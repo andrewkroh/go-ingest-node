@@ -1326,6 +1326,73 @@
         "model_id"
       ]
     },
+    "IpLocationProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "database_file": {
+          "type": "string",
+          "description": "The database filename referring to a database the module ships with (GeoLite2-City.mmdb, GeoLite2-Country.mmdb, or GeoLite2-ASN.mmdb) or a custom database in the ingest-geoip config directory.",
+          "default": "GeoLite2-City.mmdb"
+        },
+        "field": {
+          "type": "string",
+          "description": "The field to get the ip address from for the geographical lookup. Required."
+        },
+        "first_only": {
+          "type": "boolean",
+          "description": "If `true`, only the first found IP location data will be returned, even if the field contains an array.",
+          "default": true
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist, the processor quietly exits without modifying the document.",
+          "default": false
+        },
+        "properties": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Controls what properties are added to the `target_field` based on the IP location lookup."
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field that will hold the geographical information looked up from the MaxMind database.",
+          "default": "geoip"
+        },
+        "download_database_on_pipeline_creation": {
+          "type": "boolean",
+          "description": "If `true` (and if `ingest.geoip.downloader.eager.download` is `false`), the missing database is downloaded when the pipeline is created. Else, the download is triggered by when the pipeline is used as the `default_pipeline` or `final_pipeline` in an index."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ]
+    },
     "JoinProcessor": {
       "properties": {
         "description": {
@@ -1769,6 +1836,10 @@
         "foreach": {
           "$ref": "#/$defs/ForeachProcessor",
           "description": "Runs an ingest processor on each element of an array or object."
+        },
+        "ip_location": {
+          "$ref": "#/$defs/IpLocationProcessor",
+          "description": "Currently an undocumented alias for GeoIP Processor."
         },
         "geo_grid": {
           "$ref": "#/$defs/GeoGridProcessor",
