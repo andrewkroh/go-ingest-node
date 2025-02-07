@@ -46,7 +46,8 @@
       "required": [
         "field",
         "value"
-      ]
+      ],
+      "description": "Appends one or more values to an existing array if the field already exists and it is an array."
     },
     "AttachmentProcessor": {
       "properties": {
@@ -117,7 +118,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "The attachment processor lets Elasticsearch extract file attachments in common formats (such as PPT, XLS, and PDF) by using the Apache text extraction library Tika."
     },
     "BytesProcessor": {
       "properties": {
@@ -163,7 +165,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "Converts a human readable byte value (for example `1kb`) to its value in bytes (for example `1024`)."
     },
     "CircleProcessor": {
       "properties": {
@@ -222,7 +225,8 @@
         "error_distance",
         "field",
         "shape_type"
-      ]
+      ],
+      "description": "Converts circle definitions of shapes to regular polygons which approximate them."
     },
     "CommunityIDProcessor": {
       "properties": {
@@ -306,7 +310,8 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "description": "Computes the Community ID for network flow data as defined in the Community ID Specification."
     },
     "ConvertProcessor": {
       "properties": {
@@ -367,7 +372,8 @@
       "required": [
         "field",
         "type"
-      ]
+      ],
+      "description": "Converts a field in the currently ingested document to a different type, such as converting a string to an integer."
     },
     "CsvProcessor": {
       "properties": {
@@ -428,7 +434,8 @@
       "required": [
         "field",
         "target_fields"
-      ]
+      ],
+      "description": "Extracts fields from CSV line out of a single text field within a document."
     },
     "DateIndexNameProcessor": {
       "properties": {
@@ -495,7 +502,8 @@
       "required": [
         "date_rounding",
         "field"
-      ]
+      ],
+      "description": "The purpose of this processor is to point documents to the right time based index based on a date or timestamp field in a document by using the date math index name support."
     },
     "DateProcessor": {
       "properties": {
@@ -559,7 +567,8 @@
       "required": [
         "field",
         "formats"
-      ]
+      ],
+      "description": "Parses dates from fields, and then uses the date or timestamp as the timestamp for the document."
     },
     "DissectProcessor": {
       "properties": {
@@ -609,7 +618,8 @@
       "required": [
         "field",
         "pattern"
-      ]
+      ],
+      "description": "Extracts structured fields out of a single text field by matching the text field against a delimiter-based pattern."
     },
     "DotExpanderProcessor": {
       "properties": {
@@ -654,7 +664,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "Expands a field with dots into an object field."
     },
     "DropProcessor": {
       "properties": {
@@ -683,7 +694,8 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "description": "Drops the document without raising any errors."
     },
     "EnrichProcessor": {
       "properties": {
@@ -755,7 +767,8 @@
         "field",
         "policy_name",
         "target_field"
-      ]
+      ],
+      "description": "The `enrich` processor can enrich documents with data from another index."
     },
     "FailProcessor": {
       "properties": {
@@ -791,7 +804,8 @@
       "type": "object",
       "required": [
         "message"
-      ]
+      ],
+      "description": "Raises an exception."
     },
     "FingerprintProcessor": {
       "properties": {
@@ -852,7 +866,8 @@
       "type": "object",
       "required": [
         "fields"
-      ]
+      ],
+      "description": "Computes a hash of the document’s content."
     },
     "ForeachProcessor": {
       "properties": {
@@ -898,7 +913,8 @@
       "required": [
         "field",
         "processor"
-      ]
+      ],
+      "description": "Runs an ingest processor on each element of an array or object."
     },
     "GeoGridProcessor": {
       "properties": {
@@ -979,7 +995,8 @@
       "required": [
         "field",
         "tile_type"
-      ]
+      ],
+      "description": "Converts geo-grid definitions of grid tiles or cells to regular bounding boxes or polygons which describe their shape."
     },
     "GeoIpProcessor": {
       "properties": {
@@ -1046,7 +1063,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "The `geoip` processor adds information about the geographical location of an IPv4 or IPv6 address."
     },
     "GrokProcessor": {
       "properties": {
@@ -1112,7 +1130,8 @@
       "required": [
         "field",
         "patterns"
-      ]
+      ],
+      "description": "Extracts structured fields out of a single text field within a document."
     },
     "GsubProcessor": {
       "properties": {
@@ -1168,7 +1187,8 @@
         "field",
         "pattern",
         "replacement"
-      ]
+      ],
+      "description": "Converts a string field by applying a regular expression and a replacement."
     },
     "HtmlStripProcessor": {
       "properties": {
@@ -1214,7 +1234,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "Removes HTML tags from the field."
     },
     "InferenceConfig": {
       "properties": {
@@ -1323,7 +1344,8 @@
       "type": "object",
       "required": [
         "model_id"
-      ]
+      ],
+      "description": "Uses a pre-trained data frame analytics model or a model deployed for natural language processing tasks to infer against the data that is being ingested in the pipeline."
     },
     "IpLocationProcessor": {
       "properties": {
@@ -1390,7 +1412,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "Currently an undocumented alias for GeoIP Processor."
     },
     "JoinProcessor": {
       "properties": {
@@ -1436,7 +1459,8 @@
       "required": [
         "field",
         "separator"
-      ]
+      ],
+      "description": "Joins each element of an array into a single string using a separator character between each element."
     },
     "JsonProcessor": {
       "properties": {
@@ -1495,7 +1519,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "Converts a JSON string into a structured JSON object."
     },
     "KeyValueProcessor": {
       "properties": {
@@ -1581,7 +1606,8 @@
         "field",
         "field_split",
         "value_split"
-      ]
+      ],
+      "description": "This processor helps automatically parse messages (or specific event fields) which are of the `foo=bar` variety."
     },
     "LowercaseProcessor": {
       "properties": {
@@ -1627,7 +1653,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "Converts a string to its lowercase equivalent."
     },
     "Metadata": {
       "type": "object"
@@ -1690,7 +1717,8 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "description": "Calculates the network direction given a source IP address, destination IP address, and a list of internal networks."
     },
     "Pipeline": {
       "properties": {
@@ -1768,7 +1796,8 @@
       "type": "object",
       "required": [
         "name"
-      ]
+      ],
+      "description": "Executes another pipeline."
     },
     "ProcessorContainer": {
       "properties": {
@@ -2029,7 +2058,8 @@
       "required": [
         "field",
         "patterns"
-      ]
+      ],
+      "description": "The Redact processor uses the Grok rules engine to obscure text in the input document matching the given Grok patterns."
     },
     "RegisteredDomainProcessor": {
       "properties": {
@@ -2074,7 +2104,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "Extracts the registered domain (also known as the effective top-level domain or eTLD), sub-domain, and top-level domain from a fully qualified domain name (FQDN)."
     },
     "RemoveProcessor": {
       "properties": {
@@ -2117,7 +2148,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "Removes existing fields."
     },
     "RenameProcessor": {
       "properties": {
@@ -2163,7 +2195,8 @@
       "required": [
         "field",
         "target_field"
-      ]
+      ],
+      "description": "Renames an existing field."
     },
     "RerouteProcessor": {
       "properties": {
@@ -2202,7 +2235,8 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "description": "Routes a document to another target index or data stream."
     },
     "ScriptProcessor": {
       "properties": {
@@ -2248,7 +2282,8 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "description": "Runs an inline or stored script on incoming documents."
     },
     "SetProcessor": {
       "properties": {
@@ -2305,7 +2340,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "Adds a field with the specified value."
     },
     "SetSecurityUserProcessor": {
       "properties": {
@@ -2348,7 +2384,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "Sets user-related details (such as `username`, `roles`, `email`, `full_name`, `metadata`, `api_key`, `realm` and `authentication_type`) from the current authenticated user to the current document by pre-processing the ingest."
     },
     "SortProcessor": {
       "properties": {
@@ -2397,7 +2434,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "Sorts the elements of an array ascending or descending."
     },
     "SplitProcessor": {
       "properties": {
@@ -2453,7 +2491,8 @@
       "required": [
         "field",
         "separator"
-      ]
+      ],
+      "description": "Splits a field into an array using a separator character."
     },
     "TerminateProcessor": {
       "properties": {
@@ -2482,7 +2521,8 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "description": "Terminates the current ingest pipeline, causing no further processors to be run."
     },
     "TrimProcessor": {
       "properties": {
@@ -2528,7 +2568,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "Trims whitespace from a field."
     },
     "UppercaseProcessor": {
       "properties": {
@@ -2574,7 +2615,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "Converts a string to its uppercase equivalent."
     },
     "UriPartsProcessor": {
       "properties": {
@@ -2630,7 +2672,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "Parses a Uniform Resource Identifier (URI) string and extracts its components as an object."
     },
     "UrlDecodeProcessor": {
       "properties": {
@@ -2676,7 +2719,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "URL-decodes a string."
     },
     "UserAgentProcessor": {
       "properties": {
@@ -2750,7 +2794,8 @@
       "type": "object",
       "required": [
         "field"
-      ]
+      ],
+      "description": "The `user_agent` processor extracts details from the user agent string a browser sends with its web requests."
     }
   },
   "description": "Elasticsearch Ingest Node Pipeline Schema"
