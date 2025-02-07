@@ -102,12 +102,12 @@ type Interface struct {
 }
 
 type EnumMember struct {
-	Availability *Availabilites `json:"availability,omitempty"`
-	Deprecation  Deprecation    `json:"deprecation"`
-	Description  string         `json:"description,omitempty"`
-	Identifier   string         `json:"identifier,omitempty"`
-	Name         string         `json:"name,omitempty"`
-	Since        string         `json:"since,omitempty"`
+	Availability *Availabilities `json:"availability,omitempty"`
+	Deprecation  Deprecation     `json:"deprecation"`
+	Description  string          `json:"description,omitempty"`
+	Identifier   string          `json:"identifier,omitempty"`
+	Name         string          `json:"name,omitempty"`
+	Since        string          `json:"since,omitempty"`
 }
 
 type Enum struct {
@@ -158,7 +158,7 @@ type Availability struct {
 	Since       *string `json:"since,omitempty"`
 }
 
-type Availabilites struct {
+type Availabilities struct {
 	Serverless *Availability `json:"serverless,omitempty"`
 	Stack      *Availability `json:"stack,omitempty"`
 }
