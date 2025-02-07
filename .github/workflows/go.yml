@@ -30,7 +30,7 @@ jobs:
 
       # Sanity checks the generated files.
       - name: build
-        run: go build ./...
+        run: go test ./...
 
   test-generator:
     name: test-generator

@@ -28,7 +28,7 @@ jobs:
 
       # Sanity checks the generated files.
       - name: build
-        run: go build ./...
+        run: go test ./...
 
       - name: check for modified versions
         id: is-changed
