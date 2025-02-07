@@ -39,7 +39,7 @@ linters-settings:
 
 issues:
   include:
-   # If you're going to write a comment follow the conventions.
+   # If you're going to write a comment, follow the conventions.
    # https://go.dev/doc/effective_go#commentary.
    # comment on exported (.+) should be of the form "(.+)..."
    - EXC0014

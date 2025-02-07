@@ -61,7 +61,8 @@ func main() {
 	b := codegen.New(model)
 
 	err = b.BuildCode(o, func(name, inherits spec.TypeName) bool {
-		// This is what selects the types to include in generated file.
+		// This is what selects the types to include in the generated file.
+
 		// Any dependencies of these types will be included automatically.
 		return name.Namespace == "ingest._types" && name.Name == "Pipeline" || inherits.Name == "ProcessorBase"
 	})
