@@ -32,12 +32,23 @@ import (
 	"github.com/fatih/camelcase"
 )
 
-// override the _builtins from the spec with native Go types.
+// override types within the spec with native Go types.
 var overrides = map[string]string{
-	"boolean": "bool",
-	"double":  "float64",
-	"integer": "int32",
-	"long":    "int64",
+	"_builtins.boolean": "bool",
+	"_builtins.double":  "float64",
+	"_builtins.integer": "int32",
+	"_builtins.long":    "int64",
+	"_types.boolean":    "bool",
+	"_types.double":     "float64",
+	"_types.integer":    "int32",
+	"_types.long":       "int64",
+
+	// NOTE: This is an override and divergence from the upstream specification.
+	// It pins the 'if' property of processors, which are defined using
+	// _types.Script, to be a string type instead of a struct. This is a
+	// workaround solving issue:
+	// https://github.com/andrewkroh/go-ingest-node/issues/15.
+	"_types.Script": "string",
 }
 
 // acronyms is a set of acronyms that should be capitalized in identifiers.
@@ -130,7 +141,7 @@ func (b *Generator) BuildCode(w io.Writer, typeSelector func(name, inherits spec
 	// Add dependencies to the list.
 	for d := range deps {
 		// Skip overwritten types.
-		if _, found := overrides[d.Name]; found {
+		if _, found := overrides[qualifiedName(d.Namespace, d.Name)]; found {
 			continue
 		}
 
@@ -324,7 +335,7 @@ func (b *Generator) depsOfValue(v *spec.ValueOf, deps map[spec.TypeName]bool) {
 func identifier(v *spec.ValueOf) string {
 	switch {
 	case v.InstanceOf != nil:
-		if o := overrides[v.InstanceOf.TypeName.Name]; o != "" {
+		if o := overrides[qualifiedName(v.InstanceOf.Namespace, v.InstanceOf.TypeName.Name)]; o != "" {
 			return o
 		}
 		return v.InstanceOf.TypeName.Name
@@ -476,4 +487,9 @@ func trimBalanced(s string, c rune) string {
 // escapeTagPart escapes commas in struct tag values.
 func escapeTagPart(s string) string {
 	return strings.ReplaceAll(s, ",", `\,`)
+}
+
+// qualifiedName returns the combined type namespace and type name.
+func qualifiedName(ns, name string) string {
+	return ns + "." + name
 }
