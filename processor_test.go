@@ -86,3 +86,46 @@ func TestPipelineJSONUnmarshal(t *testing.T) {
 		t.Fatal("expected grok processor")
 	}
 }
+
+func TestPipelineJSONMarshal(t *testing.T) {
+	p := &Pipeline{
+		Description: ptrTo("Parse Common Log Format."),
+		Processors: []ProcessorContainer{
+			{
+				Grok: &GrokProcessor{
+					Description: ptrTo("Extract fields from 'message'"),
+					Field:       "message",
+					Patterns: []GrokPattern{
+						"%{IPORHOST:source.ip}",
+					},
+				},
+			},
+		},
+	}
+
+	want := `{
+  "description": "Parse Common Log Format.",
+  "processors": [
+    {
+      "grok": {
+        "description": "Extract fields from 'message'",
+        "field": "message",
+        "patterns": [
+          "%{IPORHOST:source.ip}"
+        ]
+      }
+    }
+  ]
+}`
+
+	got, err := json.MarshalIndent(p, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(got) != want {
+		t.Fatalf("want:\n%s got:\n%s", want, string(got))
+	}
+}
+
+func ptrTo[T any](v T) *T { return &v }
