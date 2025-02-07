@@ -460,7 +460,7 @@
             "type": "string"
           },
           "type": "array",
-          "description": "An array of the expected date formats for parsing dates / timestamps in the document being preprocessed. Can be a java time pattern or one of the following formats: ISO8601, UNIX, UNIX_MS, or TAI64N. Required."
+          "description": "An array of the expected date formats for parsing dates / timestamps in the document being preprocessed. Can be a java time pattern or one of the following formats: ISO8601, UNIX, UNIX_MS, or TAI64N."
         },
         "date_rounding": {
           "type": "string",
@@ -493,7 +493,6 @@
       "additionalProperties": false,
       "type": "object",
       "required": [
-        "date_formats",
         "date_rounding",
         "field"
       ]
