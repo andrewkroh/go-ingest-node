@@ -20,12 +20,13 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"generator/internal/codegen"
-	"generator/internal/spec"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
+
+	"generator/internal/codegen"
+	"generator/internal/spec"
 )
 
 func main() {

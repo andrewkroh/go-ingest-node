@@ -20,12 +20,13 @@ package codegen
 import (
 	"cmp"
 	"fmt"
-	"generator/internal/spec"
 	"io"
 	"slices"
 	"strconv"
 	"strings"
 	"unicode"
+
+	"generator/internal/spec"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/elastic/go-licenser/licensing"
