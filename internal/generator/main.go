@@ -25,8 +25,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"generator/internal/codegen"
-	"generator/internal/spec"
+	"github.com/andrewkroh/go-ingest-node/internal/generator/internal/codegen"
+	"github.com/andrewkroh/go-ingest-node/internal/generator/internal/spec"
 )
 
 func main() {

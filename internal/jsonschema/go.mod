@@ -1,4 +1,4 @@
-module jsonschema
+module github.com/andrewkroh/go-ingest-node/internal/jsonschema
 
 go 1.23
 
