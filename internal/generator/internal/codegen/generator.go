@@ -238,25 +238,6 @@ func (b *Generator) addInterface(f *jen.File, ifc *spec.Interface) error {
 	return nil
 }
 
-func (b *Generator) addInheritedFields(g *jen.Group, ifc *spec.Interface) error {
-	if ifc.Inherits.TypeName.Name == "" {
-		return nil
-	}
-
-	parent, found := b.allTypes[ifc.Inherits.TypeName]
-	if !found {
-		return fmt.Errorf("failed to find parent type %s.%s", ifc.Inherits.TypeName.Namespace, ifc.Inherits.TypeName.Name)
-	}
-
-	ifcType, ok := parent.Value.(spec.Interface)
-	if !ok {
-		return fmt.Errorf("%s inherits from an unexpected kind %T", ifc.TypeName.Name, parent)
-	}
-
-	b.addProperties(g, ifcType.Properties)
-	return nil
-}
-
 func (b *Generator) addProperties(g *jen.Group, props []spec.Property) {
 	for _, p := range props {
 		required := p.Required != nil && *p.Required
@@ -338,8 +319,8 @@ func (b *Generator) goStruct(ifc *spec.Interface, f *jen.File) error {
 
 	var err error
 	f.Type().Id(ifc.TypeName.Name).StructFunc(func(g *jen.Group) {
-		if err = b.addInheritedFields(g, ifc); err != nil {
-			return
+		if ifc.Inherits.TypeName.Name != "" {
+			g.Id(ifc.Inherits.TypeName.Name)
 		}
 		b.addProperties(g, ifc.Properties)
 	})
@@ -354,6 +335,13 @@ func (b *Generator) depsOfType(t *spec.TypeDefinition, deps map[spec.TypeName]bo
 
 	switch v := t.Value.(type) {
 	case spec.Interface:
+		if v.Inherits.TypeName.Name != "" {
+			deps[v.Inherits.TypeName] = true
+			if parent, found := b.allTypes[v.Inherits.TypeName]; found {
+				b.depsOfType(parent, deps)
+			}
+		}
+
 		for _, p := range v.Properties {
 			b.depsOfValue(p.Type, deps)
 		}

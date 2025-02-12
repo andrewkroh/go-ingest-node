@@ -93,8 +93,10 @@ func TestPipelineJSONMarshal(t *testing.T) {
 		Processors: []ProcessorContainer{
 			{
 				Grok: &GrokProcessor{
-					Description: ptrTo("Extract fields from 'message'"),
-					Field:       "message",
+					ProcessorBase: ProcessorBase{
+						Description: ptrTo("Extract fields from 'message'"),
+					},
+					Field: "message",
 					Patterns: []GrokPattern{
 						"%{IPORHOST:source.ip}",
 					},
