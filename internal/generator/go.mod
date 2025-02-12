@@ -1,4 +1,4 @@
-module generator
+module github.com/andrewkroh/go-ingest-node/internal/generator
 
 go 1.23
 

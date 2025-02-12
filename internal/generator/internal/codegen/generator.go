@@ -26,7 +26,7 @@ import (
 	"strings"
 	"unicode"
 
-	"generator/internal/spec"
+	"github.com/andrewkroh/go-ingest-node/internal/generator/internal/spec"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/elastic/go-licenser/licensing"
