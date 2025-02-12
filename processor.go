@@ -80,6 +80,15 @@ const (
 	MergeJSONProcessorConflictStrategy   JsonProcessorConflictStrategy = "merge"
 )
 
+type ScriptLanguage string
+
+const (
+	PainlessScriptLanguage   ScriptLanguage = "painless"
+	ExpressionScriptLanguage ScriptLanguage = "expression"
+	MustacheScriptLanguage   ScriptLanguage = "mustache"
+	JavaScriptLanguage       ScriptLanguage = "java"
+)
+
 type ShapeType string
 
 const (
@@ -130,14 +139,10 @@ Reference: [append processor]
 [append processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/append-processor.html
 */
 type AppendProcessor struct {
-	Description     *string              `json:"description,omitempty" yaml:"description,omitempty"`                                     // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If              *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                       // Conditionally execute the processor.
-	IgnoreFailure   *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                               // Ignore failures for the processor.
-	OnFailure       []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                       // Handle failures for the processor.
-	Tag             *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                     // Identifier for the processor. Useful for debugging and metrics.
-	Field           Field                `json:"field" yaml:"field"`                                                                     // The field to be appended to. Supports template snippets. Required.
-	Value           any                  `json:"value" yaml:"value"`                                                                     // The value to be appended. Supports template snippets. Required.
-	AllowDuplicates *bool                `json:"allow_duplicates,omitempty" jsonschema:"default=true" yaml:"allow_duplicates,omitempty"` // If `false`, the processor does not append values already present in the field.
+	ProcessorBase
+	Field           Field `json:"field" yaml:"field"`                                                                     // The field to be appended to. Supports template snippets. Required.
+	Value           any   `json:"value" yaml:"value"`                                                                     // The value to be appended. Supports template snippets. Required.
+	AllowDuplicates *bool `json:"allow_duplicates,omitempty" jsonschema:"default=true" yaml:"allow_duplicates,omitempty"` // If `false`, the processor does not append values already present in the field.
 }
 
 /*
@@ -150,19 +155,15 @@ Reference: [attachment processor]
 [attachment processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/attachment.html
 */
 type AttachmentProcessor struct {
-	Description       *string              `json:"description,omitempty" yaml:"description,omitempty"`                                   // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If                *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                     // Conditionally execute the processor.
-	IgnoreFailure     *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                             // Ignore failures for the processor.
-	OnFailure         []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                     // Handle failures for the processor.
-	Tag               *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                   // Identifier for the processor. Useful for debugging and metrics.
-	Field             Field                `json:"field" yaml:"field"`                                                                   // The field to get the base64 encoded field from. Required.
-	IgnoreMissing     *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`  // If `true` and field does not exist, the processor quietly exits without modifying the document.
-	IndexedChars      *int64               `json:"indexed_chars,omitempty" jsonschema:"default=100000" yaml:"indexed_chars,omitempty"`   // The number of chars being used for extraction to prevent huge fields. Use `-1` for no limit.
-	IndexedCharsField *Field               `json:"indexed_chars_field,omitempty" yaml:"indexed_chars_field,omitempty"`                   // Field name from which you can overwrite the number of chars being used for extraction.
-	Properties        []string             `json:"properties,omitempty" yaml:"properties,omitempty"`                                     // Array of properties to select to be stored. Can be `content`, `title`, `name`, `author`, `keywords`, `date`, `content_type`, `content_length`, `language`.
-	TargetField       *Field               `json:"target_field,omitempty" jsonschema:"default=attachment" yaml:"target_field,omitempty"` // The field that will hold the attachment information.
-	RemoveBinary      *bool                `json:"remove_binary,omitempty" jsonschema:"default=false" yaml:"remove_binary,omitempty"`    // If true, the binary field will be removed from the document.
-	ResourceName      *string              `json:"resource_name,omitempty" yaml:"resource_name,omitempty"`                               // Field containing the name of the resource to decode. If specified, the processor passes this resource name to the underlying Tika library to enable Resource Name Based Detection.
+	ProcessorBase
+	Field             Field    `json:"field" yaml:"field"`                                                                   // The field to get the base64 encoded field from. Required.
+	IgnoreMissing     *bool    `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`  // If `true` and field does not exist, the processor quietly exits without modifying the document.
+	IndexedChars      *int64   `json:"indexed_chars,omitempty" jsonschema:"default=100000" yaml:"indexed_chars,omitempty"`   // The number of chars being used for extraction to prevent huge fields. Use `-1` for no limit.
+	IndexedCharsField *Field   `json:"indexed_chars_field,omitempty" yaml:"indexed_chars_field,omitempty"`                   // Field name from which you can overwrite the number of chars being used for extraction.
+	Properties        []string `json:"properties,omitempty" yaml:"properties,omitempty"`                                     // Array of properties to select to be stored. Can be `content`, `title`, `name`, `author`, `keywords`, `date`, `content_type`, `content_length`, `language`.
+	TargetField       *Field   `json:"target_field,omitempty" jsonschema:"default=attachment" yaml:"target_field,omitempty"` // The field that will hold the attachment information.
+	RemoveBinary      *bool    `json:"remove_binary,omitempty" jsonschema:"default=false" yaml:"remove_binary,omitempty"`    // If true, the binary field will be removed from the document.
+	ResourceName      *string  `json:"resource_name,omitempty" yaml:"resource_name,omitempty"`                               // Field containing the name of the resource to decode. If specified, the processor passes this resource name to the underlying Tika library to enable Resource Name Based Detection.
 }
 
 /*
@@ -177,14 +178,10 @@ Reference: [bytes processor]
 [bytes processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/bytes-processor.html
 */
 type BytesProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                  // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                    // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                            // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                    // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                  // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                                                  // The field to convert. Required.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
-	TargetField   *Field               `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`     // The field to assign the converted value to. By default, the field is updated in-place.
+	ProcessorBase
+	Field         Field  `json:"field" yaml:"field"`                                                                  // The field to convert. Required.
+	IgnoreMissing *bool  `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
+	TargetField   *Field `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`     // The field to assign the converted value to. By default, the field is updated in-place.
 }
 
 /*
@@ -196,16 +193,12 @@ Reference: [circle processor]
 [circle processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest-circle-processor.html
 */
 type CircleProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                  // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                    // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                            // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                    // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                  // Identifier for the processor. Useful for debugging and metrics.
-	ErrorDistance float64              `json:"error_distance" yaml:"error_distance"`                                                // The difference between the resulting inscribed distance from center to side and the circle’s radius (measured in meters for `geo_shape`, unit-less for `shape`). Required.
-	Field         Field                `json:"field" yaml:"field"`                                                                  // The field to interpret as a circle. Either a string in WKT format or a map for GeoJSON. Required.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
-	ShapeType     ShapeType            `json:"shape_type" jsonschema:"enum=geo_shape,enum=shape" yaml:"shape_type"`                 // Which field mapping type is to be used when processing the circle: `geo_shape` or `shape`. Required.
-	TargetField   *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`                                // The field to assign the polygon shape to By default, the field is updated in-place.
+	ProcessorBase
+	ErrorDistance float64   `json:"error_distance" yaml:"error_distance"`                                                // The difference between the resulting inscribed distance from center to side and the circle’s radius (measured in meters for `geo_shape`, unit-less for `shape`). Required.
+	Field         Field     `json:"field" yaml:"field"`                                                                  // The field to interpret as a circle. Either a string in WKT format or a map for GeoJSON. Required.
+	IgnoreMissing *bool     `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
+	ShapeType     ShapeType `json:"shape_type" jsonschema:"enum=geo_shape,enum=shape" yaml:"shape_type"`                 // Which field mapping type is to be used when processing the circle: `geo_shape` or `shape`. Required.
+	TargetField   *Field    `json:"target_field,omitempty" yaml:"target_field,omitempty"`                                // The field to assign the polygon shape to By default, the field is updated in-place.
 }
 
 /*
@@ -218,22 +211,18 @@ Reference: [community_id processor]
 [community_id processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/community-id-processor.html
 */
 type CommunityIDProcessor struct {
-	Description     *string              `json:"description,omitempty" yaml:"description,omitempty"`                                                 // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If              *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                                   // Conditionally execute the processor.
-	IgnoreFailure   *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                           // Ignore failures for the processor.
-	OnFailure       []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                                   // Handle failures for the processor.
-	Tag             *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                                 // Identifier for the processor. Useful for debugging and metrics.
-	SourceIP        *Field               `json:"source_ip,omitempty" jsonschema:"default=source.ip" yaml:"source_ip,omitempty"`                      // Field containing the source IP address.
-	SourcePort      *Field               `json:"source_port,omitempty" jsonschema:"default=source.port" yaml:"source_port,omitempty"`                // Field containing the source port.
-	DestinationIP   *Field               `json:"destination_ip,omitempty" jsonschema:"default=destination.ip" yaml:"destination_ip,omitempty"`       // Field containing the destination IP address.
-	DestinationPort *Field               `json:"destination_port,omitempty" jsonschema:"default=destination.port" yaml:"destination_port,omitempty"` // Field containing the destination port.
-	IANANumber      *Field               `json:"iana_number,omitempty" jsonschema:"default=network.iana_number" yaml:"iana_number,omitempty"`        // Field containing the IANA number.
-	ICMPType        *Field               `json:"icmp_type,omitempty" jsonschema:"default=icmp.type" yaml:"icmp_type,omitempty"`                      // Field containing the ICMP type.
-	ICMPCode        *Field               `json:"icmp_code,omitempty" jsonschema:"default=icmp.code" yaml:"icmp_code,omitempty"`                      // Field containing the ICMP code.
-	Transport       *Field               `json:"transport,omitempty" jsonschema:"default=network.transport" yaml:"transport,omitempty"`              // Field containing the transport protocol name or number. Used only when the iana_number field is not present. The following protocol names are currently supported: eigrp, gre, icmp, icmpv6, igmp, ipv6-icmp, ospf, pim, sctp, tcp, udp.
-	TargetField     *Field               `json:"target_field,omitempty" jsonschema:"default=network.community_id" yaml:"target_field,omitempty"`     // Output field for the community ID.
-	Seed            *int32               `json:"seed,omitempty" jsonschema:"default=0" yaml:"seed,omitempty"`                                        // Seed for the community ID hash. Must be between 0 and 65535 (inclusive). The seed can prevent hash collisions between network domains, such as a staging and production network that use the same addressing scheme.
-	IgnoreMissing   *bool                `json:"ignore_missing,omitempty" jsonschema:"default=true" yaml:"ignore_missing,omitempty"`                 // If true and any required fields are missing, the processor quietly exits without modifying the document.
+	ProcessorBase
+	SourceIP        *Field `json:"source_ip,omitempty" jsonschema:"default=source.ip" yaml:"source_ip,omitempty"`                      // Field containing the source IP address.
+	SourcePort      *Field `json:"source_port,omitempty" jsonschema:"default=source.port" yaml:"source_port,omitempty"`                // Field containing the source port.
+	DestinationIP   *Field `json:"destination_ip,omitempty" jsonschema:"default=destination.ip" yaml:"destination_ip,omitempty"`       // Field containing the destination IP address.
+	DestinationPort *Field `json:"destination_port,omitempty" jsonschema:"default=destination.port" yaml:"destination_port,omitempty"` // Field containing the destination port.
+	IANANumber      *Field `json:"iana_number,omitempty" jsonschema:"default=network.iana_number" yaml:"iana_number,omitempty"`        // Field containing the IANA number.
+	ICMPType        *Field `json:"icmp_type,omitempty" jsonschema:"default=icmp.type" yaml:"icmp_type,omitempty"`                      // Field containing the ICMP type.
+	ICMPCode        *Field `json:"icmp_code,omitempty" jsonschema:"default=icmp.code" yaml:"icmp_code,omitempty"`                      // Field containing the ICMP code.
+	Transport       *Field `json:"transport,omitempty" jsonschema:"default=network.transport" yaml:"transport,omitempty"`              // Field containing the transport protocol name or number. Used only when the iana_number field is not present. The following protocol names are currently supported: eigrp, gre, icmp, icmpv6, igmp, ipv6-icmp, ospf, pim, sctp, tcp, udp.
+	TargetField     *Field `json:"target_field,omitempty" jsonschema:"default=network.community_id" yaml:"target_field,omitempty"`     // Output field for the community ID.
+	Seed            *int32 `json:"seed,omitempty" jsonschema:"default=0" yaml:"seed,omitempty"`                                        // Seed for the community ID hash. Must be between 0 and 65535 (inclusive). The seed can prevent hash collisions between network domains, such as a staging and production network that use the same addressing scheme.
+	IgnoreMissing   *bool  `json:"ignore_missing,omitempty" jsonschema:"default=true" yaml:"ignore_missing,omitempty"`                 // If true and any required fields are missing, the processor quietly exits without modifying the document.
 }
 
 /*
@@ -246,15 +235,11 @@ Reference: [convert processor]
 [convert processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/convert-processor.html
 */
 type ConvertProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                                                     // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                                                       // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                                               // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                                                       // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                                                     // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                                                                                     // The field whose value is to be converted. Required.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`                                    // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
-	TargetField   *Field               `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`                                        // The field to assign the converted value to. By default, the `field` is updated in-place.
-	Type          ConvertType          `json:"type" jsonschema:"enum=integer,enum=long,enum=double,enum=float,enum=boolean,enum=ip,enum=string,enum=auto" yaml:"type"` // The type to convert the existing value to. Required.
+	ProcessorBase
+	Field         Field       `json:"field" yaml:"field"`                                                                                                     // The field whose value is to be converted. Required.
+	IgnoreMissing *bool       `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`                                    // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
+	TargetField   *Field      `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`                                        // The field to assign the converted value to. By default, the `field` is updated in-place.
+	Type          ConvertType `json:"type" jsonschema:"enum=integer,enum=long,enum=double,enum=float,enum=boolean,enum=ip,enum=string,enum=auto" yaml:"type"` // The type to convert the existing value to. Required.
 }
 
 /*
@@ -266,18 +251,14 @@ Reference: [csv processor]
 [csv processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/csv-processor.html
 */
 type CsvProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                      // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                        // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                        // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                      // Identifier for the processor. Useful for debugging and metrics.
-	EmptyValue    any                  `json:"empty_value,omitempty" yaml:"empty_value,omitempty"`                      // Value used to fill empty fields. Empty fields are skipped if this is not provided. An empty field is one with no value (2 consecutive separators) or empty quotes (`""`).
-	Field         Field                `json:"field" yaml:"field"`                                                      // The field to extract data from. Required.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"`                // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
-	Quote         *string              `json:"quote,omitempty" jsonschema:"default=\"" yaml:"quote,omitempty"`          // Quote used in CSV, has to be single character string.
-	Separator     *string              `json:"separator,omitempty" jsonschema:"default=\\," yaml:"separator,omitempty"` // Separator used in CSV, has to be single character string.
-	TargetFields  Fields               `json:"target_fields" yaml:"target_fields"`                                      // The array of fields to assign extracted values to. Required.
-	Trim          *bool                `json:"trim,omitempty" yaml:"trim,omitempty"`                                    // Trim whitespaces in unquoted fields.
+	ProcessorBase
+	EmptyValue    any     `json:"empty_value,omitempty" yaml:"empty_value,omitempty"`                      // Value used to fill empty fields. Empty fields are skipped if this is not provided. An empty field is one with no value (2 consecutive separators) or empty quotes (`""`).
+	Field         Field   `json:"field" yaml:"field"`                                                      // The field to extract data from. Required.
+	IgnoreMissing *bool   `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"`                // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
+	Quote         *string `json:"quote,omitempty" jsonschema:"default=\"" yaml:"quote,omitempty"`          // Quote used in CSV, has to be single character string.
+	Separator     *string `json:"separator,omitempty" jsonschema:"default=\\," yaml:"separator,omitempty"` // Separator used in CSV, has to be single character string.
+	TargetFields  Fields  `json:"target_fields" yaml:"target_fields"`                                      // The array of fields to assign extracted values to. Required.
+	Trim          *bool   `json:"trim,omitempty" yaml:"trim,omitempty"`                                    // Trim whitespaces in unquoted fields.
 }
 
 /*
@@ -290,18 +271,14 @@ Reference: [date_index_name processor]
 [date_index_name processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/date-index-name-processor.html
 */
 type DateIndexNameProcessor struct {
-	Description     *string              `json:"description,omitempty" yaml:"description,omitempty"`                                             // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If              *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                               // Conditionally execute the processor.
-	IgnoreFailure   *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                       // Ignore failures for the processor.
-	OnFailure       []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                               // Handle failures for the processor.
-	Tag             *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                             // Identifier for the processor. Useful for debugging and metrics.
-	DateFormats     []string             `json:"date_formats,omitempty" yaml:"date_formats,omitempty"`                                           // An array of the expected date formats for parsing dates / timestamps in the document being preprocessed. Can be a java time pattern or one of the following formats: ISO8601, UNIX, UNIX_MS, or TAI64N.
-	DateRounding    string               `json:"date_rounding" yaml:"date_rounding"`                                                             // How to round the date when formatting the date into the index name. Valid values are: `y` (year), `M` (month), `w` (week), `d` (day), `h` (hour), `m` (minute) and `s` (second). Supports template snippets. Required.
-	Field           Field                `json:"field" yaml:"field"`                                                                             // The field to get the date or timestamp from. Required.
-	IndexNameFormat *string              `json:"index_name_format,omitempty" jsonschema:"default=yyyy-MM-dd" yaml:"index_name_format,omitempty"` // The format to be used when printing the parsed date into the index name. A valid java time pattern is expected here. Supports template snippets.
-	IndexNamePrefix *string              `json:"index_name_prefix,omitempty" yaml:"index_name_prefix,omitempty"`                                 // A prefix of the index name to be prepended before the printed date. Supports template snippets.
-	Locale          *string              `json:"locale,omitempty" jsonschema:"default=ENGLISH" yaml:"locale,omitempty"`                          // The locale to use when parsing the date from the document being preprocessed, relevant when parsing month names or week days.
-	Timezone        *string              `json:"timezone,omitempty" jsonschema:"default=UTC" yaml:"timezone,omitempty"`                          // The timezone to use when parsing the date and when date math index supports resolves expressions into concrete index names.
+	ProcessorBase
+	DateFormats     []string `json:"date_formats,omitempty" yaml:"date_formats,omitempty"`                                           // An array of the expected date formats for parsing dates / timestamps in the document being preprocessed. Can be a java time pattern or one of the following formats: ISO8601, UNIX, UNIX_MS, or TAI64N.
+	DateRounding    string   `json:"date_rounding" yaml:"date_rounding"`                                                             // How to round the date when formatting the date into the index name. Valid values are: `y` (year), `M` (month), `w` (week), `d` (day), `h` (hour), `m` (minute) and `s` (second). Supports template snippets. Required.
+	Field           Field    `json:"field" yaml:"field"`                                                                             // The field to get the date or timestamp from. Required.
+	IndexNameFormat *string  `json:"index_name_format,omitempty" jsonschema:"default=yyyy-MM-dd" yaml:"index_name_format,omitempty"` // The format to be used when printing the parsed date into the index name. A valid java time pattern is expected here. Supports template snippets.
+	IndexNamePrefix *string  `json:"index_name_prefix,omitempty" yaml:"index_name_prefix,omitempty"`                                 // A prefix of the index name to be prepended before the printed date. Supports template snippets.
+	Locale          *string  `json:"locale,omitempty" jsonschema:"default=ENGLISH" yaml:"locale,omitempty"`                          // The locale to use when parsing the date from the document being preprocessed, relevant when parsing month names or week days.
+	Timezone        *string  `json:"timezone,omitempty" jsonschema:"default=UTC" yaml:"timezone,omitempty"`                          // The timezone to use when parsing the date and when date math index supports resolves expressions into concrete index names.
 }
 
 /*
@@ -313,17 +290,13 @@ Reference: [date processor]
 [date processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/date-processor.html
 */
 type DateProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                                       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                                         // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                                 // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                                         // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                                       // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                                                                       // The field to get the date from. Required.
-	Formats       []string             `json:"formats" yaml:"formats"`                                                                                   // An array of the expected date formats. Can be a java time pattern or one of the following formats: ISO8601, UNIX, UNIX_MS, or TAI64N. Required.
-	Locale        *string              `json:"locale,omitempty" jsonschema:"default=ENGLISH" yaml:"locale,omitempty"`                                    // The locale to use when parsing the date, relevant when parsing month names or week days. Supports template snippets.
-	TargetField   *Field               `json:"target_field,omitempty" jsonschema:"default=@timestamp" yaml:"target_field,omitempty"`                     // The field that will hold the parsed date.
-	Timezone      *string              `json:"timezone,omitempty" jsonschema:"default=UTC" yaml:"timezone,omitempty"`                                    // The timezone to use when parsing the date. Supports template snippets.
-	OutputFormat  *string              `json:"output_format,omitempty" jsonschema:"default=yyyy-MM-dd'T'HH:mm:ss.SSSXXX" yaml:"output_format,omitempty"` // The format to use when writing the date to target_field. Must be a valid java time pattern.
+	ProcessorBase
+	Field        Field    `json:"field" yaml:"field"`                                                                                       // The field to get the date from. Required.
+	Formats      []string `json:"formats" yaml:"formats"`                                                                                   // An array of the expected date formats. Can be a java time pattern or one of the following formats: ISO8601, UNIX, UNIX_MS, or TAI64N. Required.
+	Locale       *string  `json:"locale,omitempty" jsonschema:"default=ENGLISH" yaml:"locale,omitempty"`                                    // The locale to use when parsing the date, relevant when parsing month names or week days. Supports template snippets.
+	TargetField  *Field   `json:"target_field,omitempty" jsonschema:"default=@timestamp" yaml:"target_field,omitempty"`                     // The field that will hold the parsed date.
+	Timezone     *string  `json:"timezone,omitempty" jsonschema:"default=UTC" yaml:"timezone,omitempty"`                                    // The timezone to use when parsing the date. Supports template snippets.
+	OutputFormat *string  `json:"output_format,omitempty" jsonschema:"default=yyyy-MM-dd'T'HH:mm:ss.SSSXXX" yaml:"output_format,omitempty"` // The format to use when writing the date to target_field. Must be a valid java time pattern.
 }
 
 /*
@@ -335,15 +308,11 @@ Reference: [dissect processor]
 [dissect processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/dissect-processor.html
 */
 type DissectProcessor struct {
-	Description     *string              `json:"description,omitempty" yaml:"description,omitempty"`                                  // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If              *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                    // Conditionally execute the processor.
-	IgnoreFailure   *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                            // Ignore failures for the processor.
-	OnFailure       []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                    // Handle failures for the processor.
-	Tag             *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                  // Identifier for the processor. Useful for debugging and metrics.
-	AppendSeparator *string              `json:"append_separator,omitempty" yaml:"append_separator,omitempty"`                        // The character(s) that separate the appended fields.
-	Field           Field                `json:"field" yaml:"field"`                                                                  // The field to dissect. Required.
-	IgnoreMissing   *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
-	Pattern         string               `json:"pattern" yaml:"pattern"`                                                              // The pattern to apply to the field. Required.
+	ProcessorBase
+	AppendSeparator *string `json:"append_separator,omitempty" yaml:"append_separator,omitempty"`                        // The character(s) that separate the appended fields.
+	Field           Field   `json:"field" yaml:"field"`                                                                  // The field to dissect. Required.
+	IgnoreMissing   *bool   `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
+	Pattern         string  `json:"pattern" yaml:"pattern"`                                                              // The pattern to apply to the field. Required.
 }
 
 /*
@@ -356,14 +325,10 @@ Reference: [dot_expander processor]
 [dot_expander processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/dot-expand-processor.html
 */
 type DotExpanderProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                      // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                        // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                        // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                      // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                                      // The field to expand into an object field. If set to `*`, all top-level fields will be expanded. Required.
-	Override      *bool                `json:"override,omitempty" jsonschema:"default=false" yaml:"override,omitempty"` // Controls the behavior when there is already an existing nested object that conflicts with the expanded field. When `false`, the processor will merge conflicts by combining the old and the new values into an array. When `true`, the value from the expanded field will overwrite the existing value.
-	Path          *string              `json:"path,omitempty" yaml:"path,omitempty"`                                    // The field that contains the field to expand. Only required if the field to expand is part another object field, because the `field` option can only understand leaf fields.
+	ProcessorBase
+	Field    Field   `json:"field" yaml:"field"`                                                      // The field to expand into an object field. If set to `*`, all top-level fields will be expanded. Required.
+	Override *bool   `json:"override,omitempty" jsonschema:"default=false" yaml:"override,omitempty"` // Controls the behavior when there is already an existing nested object that conflicts with the expanded field. When `false`, the processor will merge conflicts by combining the old and the new values into an array. When `true`, the value from the expanded field will overwrite the existing value.
+	Path     *string `json:"path,omitempty" yaml:"path,omitempty"`                                    // The field that contains the field to expand. Only required if the field to expand is part another object field, because the `field` option can only understand leaf fields.
 }
 
 /*
@@ -375,11 +340,7 @@ Reference: [drop processor]
 [drop processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/drop-processor.html
 */
 type DropProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"` // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`         // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                       // Identifier for the processor. Useful for debugging and metrics.
+	ProcessorBase
 }
 
 /*
@@ -390,18 +351,14 @@ Reference: [enrich processor]
 [enrich processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/enrich-processor.html
 */
 type EnrichProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                                                                               // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                                                                                 // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                                                                         // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                                                                                 // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                                                                               // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                                                                                                               // The field in the input document that matches the policies match_field used to retrieve the enrichment data. Supports template snippets. Required.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`                                                              // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
-	MaxMatches    *int32               `json:"max_matches,omitempty" jsonschema:"default=1" yaml:"max_matches,omitempty"`                                                                        // The maximum number of matched documents to include under the configured target field. The `target_field` will be turned into a json array if `max_matches` is higher than 1, otherwise `target_field` will become a json object. In order to avoid documents getting too large, the maximum allowed value is 128.
-	Override      *bool                `json:"override,omitempty" jsonschema:"default=true" yaml:"override,omitempty"`                                                                           // If processor will update fields with pre-existing non-null-valued field. When set to `false`, such fields will not be touched.
-	PolicyName    string               `json:"policy_name" yaml:"policy_name"`                                                                                                                   // The name of the enrich policy to use. Required.
-	ShapeRelation *GeoShapeRelation    `json:"shape_relation,omitempty" jsonschema:"enum=intersects,enum=disjoint,enum=within,enum=contains,default=INTERSECTS" yaml:"shape_relation,omitempty"` // A spatial relation operator used to match the geoshape of incoming documents to documents in the enrich index. This option is only used for `geo_match` enrich policy types.
-	TargetField   Field                `json:"target_field" yaml:"target_field"`                                                                                                                 // Field added to incoming documents to contain enrich data. This field contains both the `match_field` and `enrich_fields` specified in the enrich policy. Supports template snippets. Required.
+	ProcessorBase
+	Field         Field             `json:"field" yaml:"field"`                                                                                                                               // The field in the input document that matches the policies match_field used to retrieve the enrichment data. Supports template snippets. Required.
+	IgnoreMissing *bool             `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`                                                              // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
+	MaxMatches    *int32            `json:"max_matches,omitempty" jsonschema:"default=1" yaml:"max_matches,omitempty"`                                                                        // The maximum number of matched documents to include under the configured target field. The `target_field` will be turned into a json array if `max_matches` is higher than 1, otherwise `target_field` will become a json object. In order to avoid documents getting too large, the maximum allowed value is 128.
+	Override      *bool             `json:"override,omitempty" jsonschema:"default=true" yaml:"override,omitempty"`                                                                           // If processor will update fields with pre-existing non-null-valued field. When set to `false`, such fields will not be touched.
+	PolicyName    string            `json:"policy_name" yaml:"policy_name"`                                                                                                                   // The name of the enrich policy to use. Required.
+	ShapeRelation *GeoShapeRelation `json:"shape_relation,omitempty" jsonschema:"enum=intersects,enum=disjoint,enum=within,enum=contains,default=INTERSECTS" yaml:"shape_relation,omitempty"` // A spatial relation operator used to match the geoshape of incoming documents to documents in the enrich index. This option is only used for `geo_match` enrich policy types.
+	TargetField   Field             `json:"target_field" yaml:"target_field"`                                                                                                                 // Field added to incoming documents to contain enrich data. This field contains both the `match_field` and `enrich_fields` specified in the enrich policy. Supports template snippets. Required.
 }
 
 /*
@@ -413,12 +370,8 @@ Reference: [fail processor]
 [fail processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/fail-processor.html
 */
 type FailProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"` // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`         // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                       // Identifier for the processor. Useful for debugging and metrics.
-	Message       string               `json:"message" yaml:"message"`                                   // The error message thrown by the processor. Supports template snippets. Required.
+	ProcessorBase
+	Message string `json:"message" yaml:"message"` // The error message thrown by the processor. Supports template snippets. Required.
 }
 
 /*
@@ -430,16 +383,12 @@ Reference: [fingerprint processor]
 [fingerprint processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/fingerprint-processor.html
 */
 type FingerprintProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                                                                 // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                                                                   // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                                                           // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                                                                   // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                                                                 // Identifier for the processor. Useful for debugging and metrics.
-	Fields        Fields               `json:"fields" yaml:"fields"`                                                                                                               // Array of fields to include in the fingerprint. For objects, the processor hashes both the field key and value. For other fields, the processor hashes only the field value. Required.
-	TargetField   *Field               `json:"target_field,omitempty" jsonschema:"default=fingerprint" yaml:"target_field,omitempty"`                                              // Output field for the fingerprint.
-	Salt          *string              `json:"salt,omitempty" yaml:"salt,omitempty"`                                                                                               // Salt value for the hash function.
-	Method        *FingerprintDigest   `json:"method,omitempty" jsonschema:"enum=MD5,enum=SHA-1,enum=SHA-256,enum=SHA-512,enum=MurmurHash3,default=SHA-1" yaml:"method,omitempty"` // The hash method used to compute the fingerprint. Must be one of MD5, SHA-1, SHA-256, SHA-512, or MurmurHash3.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`                                                // If true, the processor ignores any missing fields. If all fields are missing, the processor silently exits without modifying the document.
+	ProcessorBase
+	Fields        Fields             `json:"fields" yaml:"fields"`                                                                                                               // Array of fields to include in the fingerprint. For objects, the processor hashes both the field key and value. For other fields, the processor hashes only the field value. Required.
+	TargetField   *Field             `json:"target_field,omitempty" jsonschema:"default=fingerprint" yaml:"target_field,omitempty"`                                              // Output field for the fingerprint.
+	Salt          *string            `json:"salt,omitempty" yaml:"salt,omitempty"`                                                                                               // Salt value for the hash function.
+	Method        *FingerprintDigest `json:"method,omitempty" jsonschema:"enum=MD5,enum=SHA-1,enum=SHA-256,enum=SHA-512,enum=MurmurHash3,default=SHA-1" yaml:"method,omitempty"` // The hash method used to compute the fingerprint. Must be one of MD5, SHA-1, SHA-256, SHA-512, or MurmurHash3.
+	IgnoreMissing *bool              `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`                                                // If true, the processor ignores any missing fields. If all fields are missing, the processor silently exits without modifying the document.
 }
 
 /*
@@ -450,14 +399,10 @@ Reference: [foreach processor]
 [foreach processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/foreach-processor.html
 */
 type ForeachProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                  // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                    // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                            // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                    // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                  // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                                                  // Field containing array or object values. Required.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true`, the processor silently exits without changing the document if the `field` is `null` or missing.
-	Processor     ProcessorContainer   `json:"processor" yaml:"processor"`                                                          // Ingest processor to run on each element. Required.
+	ProcessorBase
+	Field         Field              `json:"field" yaml:"field"`                                                                  // Field containing array or object values. Required.
+	IgnoreMissing *bool              `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true`, the processor silently exits without changing the document if the `field` is `null` or missing.
+	Processor     ProcessorContainer `json:"processor" yaml:"processor"`                                                          // Ingest processor to run on each element. Required.
 }
 
 /*
@@ -470,11 +415,7 @@ Reference: [geo_grid processor]
 [geo_grid processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest-geo-grid-processor.html
 */
 type GeoGridProcessor struct {
-	Description      *string              `json:"description,omitempty" yaml:"description,omitempty"`                                                        // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If               *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                                          // Conditionally execute the processor.
-	IgnoreFailure    *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                                  // Ignore failures for the processor.
-	OnFailure        []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                                          // Handle failures for the processor.
-	Tag              *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                                        // Identifier for the processor. Useful for debugging and metrics.
+	ProcessorBase
 	Field            string               `json:"field" yaml:"field"`                                                                                        // The field to interpret as a geo-tile.= The field format is determined by the `tile_type`. Required.
 	TileType         GeoGridTileType      `json:"tile_type" jsonschema:"enum=geotile,enum=geohex,enum=geohash" yaml:"tile_type"`                             // Three tile formats are understood: geohash, geotile and geohex. Required.
 	TargetField      *Field               `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`                           // The field to assign the polygon shape to, by default, the `field` is updated in-place.
@@ -495,18 +436,14 @@ Reference: [geoip processor]
 [geoip processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/geoip-processor.html
 */
 type GeoIpProcessor struct {
-	Description                        *string              `json:"description,omitempty" yaml:"description,omitempty"`                                                       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If                                 *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                                         // Conditionally execute the processor.
-	IgnoreFailure                      *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                                 // Ignore failures for the processor.
-	OnFailure                          []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                                         // Handle failures for the processor.
-	Tag                                *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                                       // Identifier for the processor. Useful for debugging and metrics.
-	DatabaseFile                       *string              `json:"database_file,omitempty" jsonschema:"default=GeoLite2-City.mmdb" yaml:"database_file,omitempty"`           // The database filename referring to a database the module ships with (GeoLite2-City.mmdb, GeoLite2-Country.mmdb, or GeoLite2-ASN.mmdb) or a custom database in the ingest-geoip config directory.
-	Field                              Field                `json:"field" yaml:"field"`                                                                                       // The field to get the ip address from for the geographical lookup. Required.
-	FirstOnly                          *bool                `json:"first_only,omitempty" jsonschema:"default=true" yaml:"first_only,omitempty"`                               // If `true`, only the first found geoip data will be returned, even if the field contains an array.
-	IgnoreMissing                      *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`                      // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
-	Properties                         []string             `json:"properties,omitempty" yaml:"properties,omitempty"`                                                         // Controls what properties are added to the `target_field` based on the geoip lookup.
-	TargetField                        *Field               `json:"target_field,omitempty" jsonschema:"default=geoip" yaml:"target_field,omitempty"`                          // The field that will hold the geographical information looked up from the MaxMind database.
-	DownloadDatabaseOnPipelineCreation *bool                `json:"download_database_on_pipeline_creation,omitempty" yaml:"download_database_on_pipeline_creation,omitempty"` // If `true` (and if `ingest.geoip.downloader.eager.download` is `false`), the missing database is downloaded when the pipeline is created. Else, the download is triggered by when the pipeline is used as the `default_pipeline` or `final_pipeline` in an index.
+	ProcessorBase
+	DatabaseFile                       *string  `json:"database_file,omitempty" jsonschema:"default=GeoLite2-City.mmdb" yaml:"database_file,omitempty"`           // The database filename referring to a database the module ships with (GeoLite2-City.mmdb, GeoLite2-Country.mmdb, or GeoLite2-ASN.mmdb) or a custom database in the ingest-geoip config directory.
+	Field                              Field    `json:"field" yaml:"field"`                                                                                       // The field to get the ip address from for the geographical lookup. Required.
+	FirstOnly                          *bool    `json:"first_only,omitempty" jsonschema:"default=true" yaml:"first_only,omitempty"`                               // If `true`, only the first found geoip data will be returned, even if the field contains an array.
+	IgnoreMissing                      *bool    `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`                      // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
+	Properties                         []string `json:"properties,omitempty" yaml:"properties,omitempty"`                                                         // Controls what properties are added to the `target_field` based on the geoip lookup.
+	TargetField                        *Field   `json:"target_field,omitempty" jsonschema:"default=geoip" yaml:"target_field,omitempty"`                          // The field that will hold the geographical information looked up from the MaxMind database.
+	DownloadDatabaseOnPipelineCreation *bool    `json:"download_database_on_pipeline_creation,omitempty" yaml:"download_database_on_pipeline_creation,omitempty"` // If `true` (and if `ingest.geoip.downloader.eager.download` is `false`), the missing database is downloaded when the pipeline is created. Else, the download is triggered by when the pipeline is used as the `default_pipeline` or `final_pipeline` in an index.
 }
 
 /*
@@ -520,17 +457,13 @@ Reference: [grok processor]
 [grok processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/grok-processor.html
 */
 type GrokProcessor struct {
-	Description        *string              `json:"description,omitempty" yaml:"description,omitempty"`                                           // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If                 *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                             // Conditionally execute the processor.
-	IgnoreFailure      *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                     // Ignore failures for the processor.
-	OnFailure          []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                             // Handle failures for the processor.
-	Tag                *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                           // Identifier for the processor. Useful for debugging and metrics.
-	EcsCompatibility   *string              `json:"ecs_compatibility,omitempty" jsonschema:"default=disabled" yaml:"ecs_compatibility,omitempty"` // Must be disabled or v1. If v1, the processor uses patterns with Elastic Common Schema (ECS) field names.
-	Field              Field                `json:"field" yaml:"field"`                                                                           // The field to use for grok expression parsing. Required.
-	IgnoreMissing      *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`          // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
-	PatternDefinitions map[string]string    `json:"pattern_definitions,omitempty" yaml:"pattern_definitions,omitempty"`                           // A map of pattern-name and pattern tuples defining custom patterns to be used by the current processor. Patterns matching existing names will override the pre-existing definition.
-	Patterns           []GrokPattern        `json:"patterns" yaml:"patterns"`                                                                     // An ordered list of grok expression to match and extract named captures with. Returns on the first expression in the list that matches. Required.
-	TraceMatch         *bool                `json:"trace_match,omitempty" jsonschema:"default=false" yaml:"trace_match,omitempty"`                // When `true`, `_ingest._grok_match_index` will be inserted into your matched document’s metadata with the index into the pattern found in `patterns` that matched.
+	ProcessorBase
+	EcsCompatibility   *string           `json:"ecs_compatibility,omitempty" jsonschema:"default=disabled" yaml:"ecs_compatibility,omitempty"` // Must be disabled or v1. If v1, the processor uses patterns with Elastic Common Schema (ECS) field names.
+	Field              Field             `json:"field" yaml:"field"`                                                                           // The field to use for grok expression parsing. Required.
+	IgnoreMissing      *bool             `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`          // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
+	PatternDefinitions map[string]string `json:"pattern_definitions,omitempty" yaml:"pattern_definitions,omitempty"`                           // A map of pattern-name and pattern tuples defining custom patterns to be used by the current processor. Patterns matching existing names will override the pre-existing definition.
+	Patterns           []GrokPattern     `json:"patterns" yaml:"patterns"`                                                                     // An ordered list of grok expression to match and extract named captures with. Returns on the first expression in the list that matches. Required.
+	TraceMatch         *bool             `json:"trace_match,omitempty" jsonschema:"default=false" yaml:"trace_match,omitempty"`                // When `true`, `_ingest._grok_match_index` will be inserted into your matched document’s metadata with the index into the pattern found in `patterns` that matched.
 }
 
 /*
@@ -543,16 +476,12 @@ Reference: [gsub processor]
 [gsub processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/gsub-processor.html
 */
 type GsubProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                  // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                    // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                            // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                    // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                  // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                                                  // The field to apply the replacement to. Required.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
-	Pattern       string               `json:"pattern" yaml:"pattern"`                                                              // The pattern to be replaced. Required.
-	Replacement   string               `json:"replacement" yaml:"replacement"`                                                      // The string to replace the matching patterns with. Required.
-	TargetField   *Field               `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`     // The field to assign the converted value to By default, the `field` is updated in-place.
+	ProcessorBase
+	Field         Field  `json:"field" yaml:"field"`                                                                  // The field to apply the replacement to. Required.
+	IgnoreMissing *bool  `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
+	Pattern       string `json:"pattern" yaml:"pattern"`                                                              // The pattern to be replaced. Required.
+	Replacement   string `json:"replacement" yaml:"replacement"`                                                      // The string to replace the matching patterns with. Required.
+	TargetField   *Field `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`     // The field to assign the converted value to By default, the `field` is updated in-place.
 }
 
 /*
@@ -560,14 +489,10 @@ Removes HTML tags from the field. If the field is an array of strings, HTML tags
 will be removed from all members of the array.
 */
 type HtmlStripProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                  // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                    // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                            // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                    // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                  // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                                                  // The string-valued field to remove HTML tags from. Required.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document,.
-	TargetField   *Field               `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`     // The field to assign the converted value to By default, the `field` is updated in-place.
+	ProcessorBase
+	Field         Field  `json:"field" yaml:"field"`                                                                  // The string-valued field to remove HTML tags from. Required.
+	IgnoreMissing *bool  `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document,.
+	TargetField   *Field `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`     // The field to assign the converted value to By default, the `field` is updated in-place.
 }
 
 type InferenceConfig struct {
@@ -598,31 +523,23 @@ Reference: [inference processor]
 [inference processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/inference-processor.html
 */
 type InferenceProcessor struct {
-	Description     *string              `json:"description,omitempty" yaml:"description,omitempty"`                                                     // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If              *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                                       // Conditionally execute the processor.
-	IgnoreFailure   *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                               // Ignore failures for the processor.
-	OnFailure       []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                                       // Handle failures for the processor.
-	Tag             *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                                     // Identifier for the processor. Useful for debugging and metrics.
-	ModelID         Id                   `json:"model_id" yaml:"model_id"`                                                                               // The ID or alias for the trained model, or the ID of the deployment. Required.
-	TargetField     *Field               `json:"target_field,omitempty" jsonschema:"default=ml.inference.<processor_tag>" yaml:"target_field,omitempty"` // Field added to incoming documents to contain results objects.
-	FieldMap        map[string]any       `json:"field_map,omitempty" yaml:"field_map,omitempty"`                                                         // Maps the document field names to the known field names of the model. This mapping takes precedence over any default mappings provided in the model configuration.
-	InferenceConfig *InferenceConfig     `json:"inference_config,omitempty" yaml:"inference_config,omitempty"`                                           // Contains the inference type and its options.
+	ProcessorBase
+	ModelID         Id               `json:"model_id" yaml:"model_id"`                                                                               // The ID or alias for the trained model, or the ID of the deployment. Required.
+	TargetField     *Field           `json:"target_field,omitempty" jsonschema:"default=ml.inference.<processor_tag>" yaml:"target_field,omitempty"` // Field added to incoming documents to contain results objects.
+	FieldMap        map[string]any   `json:"field_map,omitempty" yaml:"field_map,omitempty"`                                                         // Maps the document field names to the known field names of the model. This mapping takes precedence over any default mappings provided in the model configuration.
+	InferenceConfig *InferenceConfig `json:"inference_config,omitempty" yaml:"inference_config,omitempty"`                                           // Contains the inference type and its options.
 }
 
 // Currently an undocumented alias for GeoIP Processor.
 type IpLocationProcessor struct {
-	Description                        *string              `json:"description,omitempty" yaml:"description,omitempty"`                                                       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If                                 *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                                         // Conditionally execute the processor.
-	IgnoreFailure                      *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                                 // Ignore failures for the processor.
-	OnFailure                          []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                                         // Handle failures for the processor.
-	Tag                                *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                                       // Identifier for the processor. Useful for debugging and metrics.
-	DatabaseFile                       *string              `json:"database_file,omitempty" jsonschema:"default=GeoLite2-City.mmdb" yaml:"database_file,omitempty"`           // The database filename referring to a database the module ships with (GeoLite2-City.mmdb, GeoLite2-Country.mmdb, or GeoLite2-ASN.mmdb) or a custom database in the ingest-geoip config directory.
-	Field                              Field                `json:"field" yaml:"field"`                                                                                       // The field to get the ip address from for the geographical lookup. Required.
-	FirstOnly                          *bool                `json:"first_only,omitempty" jsonschema:"default=true" yaml:"first_only,omitempty"`                               // If `true`, only the first found IP location data will be returned, even if the field contains an array.
-	IgnoreMissing                      *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`                      // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
-	Properties                         []string             `json:"properties,omitempty" yaml:"properties,omitempty"`                                                         // Controls what properties are added to the `target_field` based on the IP location lookup.
-	TargetField                        *Field               `json:"target_field,omitempty" jsonschema:"default=geoip" yaml:"target_field,omitempty"`                          // The field that will hold the geographical information looked up from the MaxMind database.
-	DownloadDatabaseOnPipelineCreation *bool                `json:"download_database_on_pipeline_creation,omitempty" yaml:"download_database_on_pipeline_creation,omitempty"` // If `true` (and if `ingest.geoip.downloader.eager.download` is `false`), the missing database is downloaded when the pipeline is created. Else, the download is triggered by when the pipeline is used as the `default_pipeline` or `final_pipeline` in an index.
+	ProcessorBase
+	DatabaseFile                       *string  `json:"database_file,omitempty" jsonschema:"default=GeoLite2-City.mmdb" yaml:"database_file,omitempty"`           // The database filename referring to a database the module ships with (GeoLite2-City.mmdb, GeoLite2-Country.mmdb, or GeoLite2-ASN.mmdb) or a custom database in the ingest-geoip config directory.
+	Field                              Field    `json:"field" yaml:"field"`                                                                                       // The field to get the ip address from for the geographical lookup. Required.
+	FirstOnly                          *bool    `json:"first_only,omitempty" jsonschema:"default=true" yaml:"first_only,omitempty"`                               // If `true`, only the first found IP location data will be returned, even if the field contains an array.
+	IgnoreMissing                      *bool    `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`                      // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
+	Properties                         []string `json:"properties,omitempty" yaml:"properties,omitempty"`                                                         // Controls what properties are added to the `target_field` based on the IP location lookup.
+	TargetField                        *Field   `json:"target_field,omitempty" jsonschema:"default=geoip" yaml:"target_field,omitempty"`                          // The field that will hold the geographical information looked up from the MaxMind database.
+	DownloadDatabaseOnPipelineCreation *bool    `json:"download_database_on_pipeline_creation,omitempty" yaml:"download_database_on_pipeline_creation,omitempty"` // If `true` (and if `ingest.geoip.downloader.eager.download` is `false`), the missing database is downloaded when the pipeline is created. Else, the download is triggered by when the pipeline is used as the `default_pipeline` or `final_pipeline` in an index.
 }
 
 /*
@@ -634,14 +551,10 @@ Reference: [join processor]
 [join processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/join-processor.html
 */
 type JoinProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                              // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                        // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                              // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                                              // Field containing array values to join. Required.
-	Separator     string               `json:"separator" yaml:"separator"`                                                      // The separator character. Required.
-	TargetField   *Field               `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"` // The field to assign the joined value to. By default, the field is updated in-place.
+	ProcessorBase
+	Field       Field  `json:"field" yaml:"field"`                                                              // Field containing array values to join. Required.
+	Separator   string `json:"separator" yaml:"separator"`                                                      // The separator character. Required.
+	TargetField *Field `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"` // The field to assign the joined value to. By default, the field is updated in-place.
 }
 
 /*
@@ -652,11 +565,7 @@ Reference: [json processor]
 [json processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/json-processor.html
 */
 type JsonProcessor struct {
-	Description               *string                        `json:"description,omitempty" yaml:"description,omitempty"`                                                                          // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If                        *string                        `json:"if,omitempty" yaml:"if,omitempty"`                                                                                            // Conditionally execute the processor.
-	IgnoreFailure             *bool                          `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                                                    // Ignore failures for the processor.
-	OnFailure                 []ProcessorContainer           `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                                                            // Handle failures for the processor.
-	Tag                       *string                        `json:"tag,omitempty" yaml:"tag,omitempty"`                                                                                          // Identifier for the processor. Useful for debugging and metrics.
+	ProcessorBase
 	AddToRoot                 *bool                          `json:"add_to_root,omitempty" jsonschema:"default=false" yaml:"add_to_root,omitempty"`                                               // Flag that forces the parsed JSON to be added at the top level of the document. `target_field` must not be set when this option is chosen.
 	AddToRootConflictStrategy *JsonProcessorConflictStrategy `json:"add_to_root_conflict_strategy,omitempty" jsonschema:"enum=replace,enum=merge" yaml:"add_to_root_conflict_strategy,omitempty"` // When set to `replace`, root fields that conflict with fields from the parsed JSON will be overridden. When set to `merge`, conflicting fields will be merged. Only applicable `if add_to_root` is set to true.
 	AllowDuplicateKeys        *bool                          `json:"allow_duplicate_keys,omitempty" jsonschema:"default=false" yaml:"allow_duplicate_keys,omitempty"`                             // When set to `true`, the JSON parser will not fail if the JSON contains duplicate keys. Instead, the last encountered value for any duplicate key wins.
@@ -673,22 +582,18 @@ Reference: [kv processor]
 [kv processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/kv-processor.html
 */
 type KeyValueProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                  // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                    // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                            // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                    // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                  // Identifier for the processor. Useful for debugging and metrics.
-	ExcludeKeys   []string             `json:"exclude_keys,omitempty" yaml:"exclude_keys,omitempty"`                                // List of keys to exclude from document.
-	Field         Field                `json:"field" yaml:"field"`                                                                  // The field to be parsed. Supports template snippets. Required.
-	FieldSplit    string               `json:"field_split" yaml:"field_split"`                                                      // Regex pattern to use for splitting key-value pairs. Required.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
-	IncludeKeys   []string             `json:"include_keys,omitempty" yaml:"include_keys,omitempty"`                                // List of keys to filter and insert into document. Defaults to including all keys.
-	Prefix        *string              `json:"prefix,omitempty" yaml:"prefix,omitempty"`                                            // Prefix to be added to extracted keys.
-	StripBrackets *bool                `json:"strip_brackets,omitempty" jsonschema:"default=false" yaml:"strip_brackets,omitempty"` // If `true`. strip brackets `()`, `<>`, `[]` as well as quotes `'` and `"` from extracted values.
-	TargetField   *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`                                // The field to insert the extracted keys into. Defaults to the root of the document. Supports template snippets.
-	TrimKey       *string              `json:"trim_key,omitempty" yaml:"trim_key,omitempty"`                                        // String of characters to trim from extracted keys.
-	TrimValue     *string              `json:"trim_value,omitempty" yaml:"trim_value,omitempty"`                                    // String of characters to trim from extracted values.
-	ValueSplit    string               `json:"value_split" yaml:"value_split"`                                                      // Regex pattern to use for splitting the key from the value within a key-value pair. Required.
+	ProcessorBase
+	ExcludeKeys   []string `json:"exclude_keys,omitempty" yaml:"exclude_keys,omitempty"`                                // List of keys to exclude from document.
+	Field         Field    `json:"field" yaml:"field"`                                                                  // The field to be parsed. Supports template snippets. Required.
+	FieldSplit    string   `json:"field_split" yaml:"field_split"`                                                      // Regex pattern to use for splitting key-value pairs. Required.
+	IgnoreMissing *bool    `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
+	IncludeKeys   []string `json:"include_keys,omitempty" yaml:"include_keys,omitempty"`                                // List of keys to filter and insert into document. Defaults to including all keys.
+	Prefix        *string  `json:"prefix,omitempty" yaml:"prefix,omitempty"`                                            // Prefix to be added to extracted keys.
+	StripBrackets *bool    `json:"strip_brackets,omitempty" jsonschema:"default=false" yaml:"strip_brackets,omitempty"` // If `true`. strip brackets `()`, `<>`, `[]` as well as quotes `'` and `"` from extracted values.
+	TargetField   *Field   `json:"target_field,omitempty" yaml:"target_field,omitempty"`                                // The field to insert the extracted keys into. Defaults to the root of the document. Supports template snippets.
+	TrimKey       *string  `json:"trim_key,omitempty" yaml:"trim_key,omitempty"`                                        // String of characters to trim from extracted keys.
+	TrimValue     *string  `json:"trim_value,omitempty" yaml:"trim_value,omitempty"`                                    // String of characters to trim from extracted values.
+	ValueSplit    string   `json:"value_split" yaml:"value_split"`                                                      // Regex pattern to use for splitting the key from the value within a key-value pair. Required.
 }
 
 /*
@@ -700,14 +605,10 @@ Reference: [lowercase processor]
 [lowercase processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/lowercase-processor.html
 */
 type LowercaseProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                  // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                    // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                            // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                    // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                  // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                                                  // The field to make lowercase. Required.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
-	TargetField   *Field               `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`     // The field to assign the converted value to. By default, the field is updated in-place.
+	ProcessorBase
+	Field         Field  `json:"field" yaml:"field"`                                                                  // The field to make lowercase. Required.
+	IgnoreMissing *bool  `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
+	TargetField   *Field `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`     // The field to assign the converted value to. By default, the field is updated in-place.
 }
 
 /*
@@ -719,17 +620,13 @@ Reference: [network_direction processor]
 [network_direction processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/network-direction-processor.html
 */
 type NetworkDirectionProcessor struct {
-	Description           *string              `json:"description,omitempty" yaml:"description,omitempty"`                                           // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If                    *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                             // Conditionally execute the processor.
-	IgnoreFailure         *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                     // Ignore failures for the processor.
-	OnFailure             []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                             // Handle failures for the processor.
-	Tag                   *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                           // Identifier for the processor. Useful for debugging and metrics.
-	SourceIP              *Field               `json:"source_ip,omitempty" jsonschema:"default=source.ip" yaml:"source_ip,omitempty"`                // Field containing the source IP address.
-	DestinationIP         *Field               `json:"destination_ip,omitempty" jsonschema:"default=destination.ip" yaml:"destination_ip,omitempty"` // Field containing the destination IP address.
-	TargetField           *Field               `json:"target_field,omitempty" jsonschema:"default=network.direction" yaml:"target_field,omitempty"`  // Output field for the network direction.
-	InternalNetworks      []string             `json:"internal_networks,omitempty" yaml:"internal_networks,omitempty"`                               // List of internal networks. Supports IPv4 and IPv6 addresses and ranges in CIDR notation. Also supports the named ranges listed below. These may be constructed with template snippets. Must specify only one of internal_networks or internal_networks_field.
-	InternalNetworksField *Field               `json:"internal_networks_field,omitempty" yaml:"internal_networks_field,omitempty"`                   // A field on the given document to read the internal_networks configuration from.
-	IgnoreMissing         *bool                `json:"ignore_missing,omitempty" jsonschema:"default=true" yaml:"ignore_missing,omitempty"`           // If true and any required fields are missing, the processor quietly exits without modifying the document.
+	ProcessorBase
+	SourceIP              *Field   `json:"source_ip,omitempty" jsonschema:"default=source.ip" yaml:"source_ip,omitempty"`                // Field containing the source IP address.
+	DestinationIP         *Field   `json:"destination_ip,omitempty" jsonschema:"default=destination.ip" yaml:"destination_ip,omitempty"` // Field containing the destination IP address.
+	TargetField           *Field   `json:"target_field,omitempty" jsonschema:"default=network.direction" yaml:"target_field,omitempty"`  // Output field for the network direction.
+	InternalNetworks      []string `json:"internal_networks,omitempty" yaml:"internal_networks,omitempty"`                               // List of internal networks. Supports IPv4 and IPv6 addresses and ranges in CIDR notation. Also supports the named ranges listed below. These may be constructed with template snippets. Must specify only one of internal_networks or internal_networks_field.
+	InternalNetworksField *Field   `json:"internal_networks_field,omitempty" yaml:"internal_networks_field,omitempty"`                   // A field on the given document to read the internal_networks configuration from.
+	IgnoreMissing         *bool    `json:"ignore_missing,omitempty" jsonschema:"default=true" yaml:"ignore_missing,omitempty"`           // If true and any required fields are missing, the processor quietly exits without modifying the document.
 }
 
 type Pipeline struct {
@@ -749,13 +646,17 @@ Reference: [pipeline processor]
 [pipeline processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/pipeline-processor.html
 */
 type PipelineProcessor struct {
-	Description           *string              `json:"description,omitempty" yaml:"description,omitempty"`                                                    // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If                    *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                                      // Conditionally execute the processor.
-	IgnoreFailure         *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                              // Ignore failures for the processor.
-	OnFailure             []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                                      // Handle failures for the processor.
-	Tag                   *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                                    // Identifier for the processor. Useful for debugging and metrics.
-	Name                  Name                 `json:"name" yaml:"name"`                                                                                      // The name of the pipeline to execute. Supports template snippets. Required.
-	IgnoreMissingPipeline *bool                `json:"ignore_missing_pipeline,omitempty" jsonschema:"default=false" yaml:"ignore_missing_pipeline,omitempty"` // Whether to ignore missing pipelines instead of failing.
+	ProcessorBase
+	Name                  Name  `json:"name" yaml:"name"`                                                                                      // The name of the pipeline to execute. Supports template snippets. Required.
+	IgnoreMissingPipeline *bool `json:"ignore_missing_pipeline,omitempty" jsonschema:"default=false" yaml:"ignore_missing_pipeline,omitempty"` // Whether to ignore missing pipelines instead of failing.
+}
+
+type ProcessorBase struct {
+	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
+	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
+	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"` // Ignore failures for the processor.
+	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`         // Handle failures for the processor.
+	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                       // Identifier for the processor. Useful for debugging and metrics.
 }
 
 type ProcessorContainer struct {
@@ -819,19 +720,15 @@ Reference: [redact processor]
 [redact processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/redact-processor.html
 */
 type RedactProcessor struct {
-	Description        *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If                 *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
-	IgnoreFailure      *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"` // Ignore failures for the processor.
-	OnFailure          []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`         // Handle failures for the processor.
-	Tag                *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                       // Identifier for the processor. Useful for debugging and metrics.
-	Field              Field                `json:"field" yaml:"field"`                                       // The field to be redacted. Required.
-	Patterns           []GrokPattern        `json:"patterns" yaml:"patterns"`                                 // A list of grok expressions to match and redact named captures with. Required.
-	PatternDefinitions map[string]string    `json:"pattern_definitions,omitempty" yaml:"pattern_definitions,omitempty"`
-	Prefix             *string              `json:"prefix,omitempty" jsonschema:"default=<" yaml:"prefix,omitempty"`                             // Start a redacted section with this token.
-	Suffix             *string              `json:"suffix,omitempty" jsonschema:"default=>" yaml:"suffix,omitempty"`                             // End a redacted section with this token.
-	IgnoreMissing      *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`         // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
-	SkipIfUnlicensed   *bool                `json:"skip_if_unlicensed,omitempty" jsonschema:"default=false" yaml:"skip_if_unlicensed,omitempty"` // If `true` and the current license does not support running redact processors, then the processor quietly exits without modifying the document.
-	TraceRedact        *bool                `json:"trace_redact,omitempty" jsonschema:"default=false" yaml:"trace_redact,omitempty"`             // If `true` then ingest metadata `_ingest._redact._is_redacted` is set to `true` if the document has been redacted.
+	ProcessorBase
+	Field              Field             `json:"field" yaml:"field"`       // The field to be redacted. Required.
+	Patterns           []GrokPattern     `json:"patterns" yaml:"patterns"` // A list of grok expressions to match and redact named captures with. Required.
+	PatternDefinitions map[string]string `json:"pattern_definitions,omitempty" yaml:"pattern_definitions,omitempty"`
+	Prefix             *string           `json:"prefix,omitempty" jsonschema:"default=<" yaml:"prefix,omitempty"`                             // Start a redacted section with this token.
+	Suffix             *string           `json:"suffix,omitempty" jsonschema:"default=>" yaml:"suffix,omitempty"`                             // End a redacted section with this token.
+	IgnoreMissing      *bool             `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`         // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
+	SkipIfUnlicensed   *bool             `json:"skip_if_unlicensed,omitempty" jsonschema:"default=false" yaml:"skip_if_unlicensed,omitempty"` // If `true` and the current license does not support running redact processors, then the processor quietly exits without modifying the document.
+	TraceRedact        *bool             `json:"trace_redact,omitempty" jsonschema:"default=false" yaml:"trace_redact,omitempty"`             // If `true` then ingest metadata `_ingest._redact._is_redacted` is set to `true` if the document has been redacted.
 }
 
 /*
@@ -844,14 +741,10 @@ Reference: [registered_domain processor]
 [registered_domain processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/registered-domain-processor.html
 */
 type RegisteredDomainProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                 // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                   // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                           // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                   // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                 // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                                                 // Field containing the source FQDN. Required.
-	TargetField   *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`                               // Object field containing extracted domain components. If an empty string, the processor adds components to the document’s root.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" jsonschema:"default=true" yaml:"ignore_missing,omitempty"` // If true and any required fields are missing, the processor quietly exits without modifying the document.
+	ProcessorBase
+	Field         Field  `json:"field" yaml:"field"`                                                                 // Field containing the source FQDN. Required.
+	TargetField   *Field `json:"target_field,omitempty" yaml:"target_field,omitempty"`                               // Object field containing extracted domain components. If an empty string, the processor adds components to the document’s root.
+	IgnoreMissing *bool  `json:"ignore_missing,omitempty" jsonschema:"default=true" yaml:"ignore_missing,omitempty"` // If true and any required fields are missing, the processor quietly exits without modifying the document.
 }
 
 /*
@@ -863,14 +756,10 @@ Reference: [remove processor]
 [remove processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/remove-processor.html
 */
 type RemoveProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                  // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                    // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                            // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                    // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                  // Identifier for the processor. Useful for debugging and metrics.
-	Field         Fields               `json:"field" yaml:"field"`                                                                  // Fields to be removed. Supports template snippets. Required.
-	Keep          *Fields              `json:"keep,omitempty" yaml:"keep,omitempty"`                                                // Fields to be kept. When set, all fields other than those specified are removed.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
+	ProcessorBase
+	Field         Fields  `json:"field" yaml:"field"`                                                                  // Fields to be removed. Supports template snippets. Required.
+	Keep          *Fields `json:"keep,omitempty" yaml:"keep,omitempty"`                                                // Fields to be kept. When set, all fields other than those specified are removed.
+	IgnoreMissing *bool   `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
 }
 
 /*
@@ -882,14 +771,10 @@ Reference: [rename processor]
 [rename processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/rename-processor.html
 */
 type RenameProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                  // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                    // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                            // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                    // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                  // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                                                  // The field to be renamed. Supports template snippets. Required.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
-	TargetField   Field                `json:"target_field" yaml:"target_field"`                                                    // The new name of the field. Supports template snippets. Required.
+	ProcessorBase
+	Field         Field `json:"field" yaml:"field"`                                                                  // The field to be renamed. Supports template snippets. Required.
+	IgnoreMissing *bool `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
+	TargetField   Field `json:"target_field" yaml:"target_field"`                                                    // The new name of the field. Supports template snippets. Required.
 }
 
 /*
@@ -905,14 +790,10 @@ Reference: [reroute processor]
 [reroute processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/reroute-processor.html
 */
 type RerouteProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"` // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`         // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                       // Identifier for the processor. Useful for debugging and metrics.
-	Destination   *string              `json:"destination,omitempty" yaml:"destination,omitempty"`       // A static value for the target. Can’t be set when the dataset or namespace option is set.
-	Dataset       any                  `json:"dataset,omitempty" yaml:"dataset,omitempty"`               // Field references or a static value for the dataset part of the data stream name. In addition to the criteria for index names, cannot contain - and must be no longer than 100 characters. Example values are nginx.access and nginx.error.  Supports field references with a mustache-like syntax (denoted as {{double}} or {{{triple}}} curly braces). When resolving field references, the processor replaces invalid characters with _. Uses the <dataset> part of the index name as a fallback if all field references resolve to a null, missing, or non-string value.  default {{data_stream.dataset}}.
-	Namespace     any                  `json:"namespace,omitempty" yaml:"namespace,omitempty"`           // Field references or a static value for the namespace part of the data stream name. See the criteria for index names for allowed characters. Must be no longer than 100 characters.  Supports field references with a mustache-like syntax (denoted as {{double}} or {{{triple}}} curly braces). When resolving field references, the processor replaces invalid characters with _. Uses the <namespace> part of the index name as a fallback if all field references resolve to a null, missing, or non-string value.  default {{data_stream.namespace}}.
+	ProcessorBase
+	Destination *string `json:"destination,omitempty" yaml:"destination,omitempty"` // A static value for the target. Can’t be set when the dataset or namespace option is set.
+	Dataset     any     `json:"dataset,omitempty" yaml:"dataset,omitempty"`         // Field references or a static value for the dataset part of the data stream name. In addition to the criteria for index names, cannot contain - and must be no longer than 100 characters. Example values are nginx.access and nginx.error.  Supports field references with a mustache-like syntax (denoted as {{double}} or {{{triple}}} curly braces). When resolving field references, the processor replaces invalid characters with _. Uses the <dataset> part of the index name as a fallback if all field references resolve to a null, missing, or non-string value.  default {{data_stream.dataset}}.
+	Namespace   any     `json:"namespace,omitempty" yaml:"namespace,omitempty"`     // Field references or a static value for the namespace part of the data stream name. See the criteria for index names for allowed characters. Must be no longer than 100 characters.  Supports field references with a mustache-like syntax (denoted as {{double}} or {{{triple}}} curly braces). When resolving field references, the processor replaces invalid characters with _. Uses the <namespace> part of the index name as a fallback if all field references resolve to a null, missing, or non-string value.  default {{data_stream.namespace}}.
 }
 
 /*
@@ -924,15 +805,11 @@ Reference: [script processor]
 [script processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/script-processor.html
 */
 type ScriptProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                 // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                   // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`           // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                   // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                 // Identifier for the processor. Useful for debugging and metrics.
-	ID            *Id                  `json:"id,omitempty" yaml:"id,omitempty"`                                   // ID of a stored script. If no `source` is specified, this parameter is required.
-	Lang          *string              `json:"lang,omitempty" jsonschema:"default=painless" yaml:"lang,omitempty"` // Script language.
-	Params        map[string]any       `json:"params,omitempty" yaml:"params,omitempty"`                           // Object containing parameters for the script.
-	Source        *string              `json:"source,omitempty" yaml:"source,omitempty"`                           // Inline script. If no `id` is specified, this parameter is required.
+	ProcessorBase
+	ID     *Id            `json:"id,omitempty" yaml:"id,omitempty"`                                   // ID of a stored script. If no `source` is specified, this parameter is required.
+	Lang   *string        `json:"lang,omitempty" jsonschema:"default=painless" yaml:"lang,omitempty"` // Script language.
+	Params map[string]any `json:"params,omitempty" yaml:"params,omitempty"`                           // Object containing parameters for the script.
+	Source *string        `json:"source,omitempty" yaml:"source,omitempty"`                           // Inline script. If no `id` is specified, this parameter is required.
 }
 
 /*
@@ -944,17 +821,13 @@ Reference: [set processor]
 [set processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/set-processor.html
 */
 type SetProcessor struct {
-	Description      *string              `json:"description,omitempty" yaml:"description,omitempty"`                                          // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If               *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                            // Conditionally execute the processor.
-	IgnoreFailure    *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                    // Ignore failures for the processor.
-	OnFailure        []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                            // Handle failures for the processor.
-	Tag              *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                          // Identifier for the processor. Useful for debugging and metrics.
-	CopyFrom         *Field               `json:"copy_from,omitempty" yaml:"copy_from,omitempty"`                                              // The origin field which will be copied to `field`, cannot set `value` simultaneously. Supported data types are `boolean`, `number`, `array`, `object`, `string`, `date`, etc.
-	Field            Field                `json:"field" yaml:"field"`                                                                          // The field to insert, upsert, or update. Supports template snippets. Required.
-	IgnoreEmptyValue *bool                `json:"ignore_empty_value,omitempty" jsonschema:"default=false" yaml:"ignore_empty_value,omitempty"` // If `true` and `value` is a template snippet that evaluates to `null` or the empty string, the processor quietly exits without modifying the document.
-	MediaType        *string              `json:"media_type,omitempty" yaml:"media_type,omitempty"`                                            // The media type for encoding `value`. Applies only when value is a template snippet. Must be one of `application/json`, `text/plain`, or `application/x-www-form-urlencoded`.
-	Override         *bool                `json:"override,omitempty" jsonschema:"default=true" yaml:"override,omitempty"`                      // If `true` processor will update fields with pre-existing non-null-valued field. When set to `false`, such fields will not be touched.
-	Value            any                  `json:"value,omitempty" yaml:"value,omitempty"`                                                      // The value to be set for the field. Supports template snippets. May specify only one of `value` or `copy_from`.
+	ProcessorBase
+	CopyFrom         *Field  `json:"copy_from,omitempty" yaml:"copy_from,omitempty"`                                              // The origin field which will be copied to `field`, cannot set `value` simultaneously. Supported data types are `boolean`, `number`, `array`, `object`, `string`, `date`, etc.
+	Field            Field   `json:"field" yaml:"field"`                                                                          // The field to insert, upsert, or update. Supports template snippets. Required.
+	IgnoreEmptyValue *bool   `json:"ignore_empty_value,omitempty" jsonschema:"default=false" yaml:"ignore_empty_value,omitempty"` // If `true` and `value` is a template snippet that evaluates to `null` or the empty string, the processor quietly exits without modifying the document.
+	MediaType        *string `json:"media_type,omitempty" yaml:"media_type,omitempty"`                                            // The media type for encoding `value`. Applies only when value is a template snippet. Must be one of `application/json`, `text/plain`, or `application/x-www-form-urlencoded`.
+	Override         *bool   `json:"override,omitempty" jsonschema:"default=true" yaml:"override,omitempty"`                      // If `true` processor will update fields with pre-existing non-null-valued field. When set to `false`, such fields will not be touched.
+	Value            any     `json:"value,omitempty" yaml:"value,omitempty"`                                                      // The value to be set for the field. Supports template snippets. May specify only one of `value` or `copy_from`.
 }
 
 /*
@@ -967,13 +840,9 @@ Reference: [set_security_user processor]
 [set_security_user processor]: https://www.elastic.co/guide/en/elasticsearch/reference/{banch}/ingest-node-set-security-user-processor.html
 */
 type SetSecurityUserProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"` // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`         // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                       // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                       // The field to store the user information into. Required.
-	Properties    []string             `json:"properties,omitempty" yaml:"properties,omitempty"`         // Controls what user related properties are added to the field.
+	ProcessorBase
+	Field      Field    `json:"field" yaml:"field"`                               // The field to store the user information into. Required.
+	Properties []string `json:"properties,omitempty" yaml:"properties,omitempty"` // Controls what user related properties are added to the field.
 }
 
 /*
@@ -987,14 +856,10 @@ Reference: [sort processor]
 [sort processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/sort-processor.html
 */
 type SortProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                 // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                   // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                           // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                   // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                 // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                                                 // The field to be sorted. Required.
-	Order         *SortOrder           `json:"order,omitempty" jsonschema:"enum=asc,enum=desc,default=asc" yaml:"order,omitempty"` // The sort order to use. Accepts `"asc"` or `"desc"`.
-	TargetField   *Field               `json:"target_field,omitempty" yaml:"target_field,omitempty"`                               // The field to assign the sorted value to. By default, the field is updated in-place.
+	ProcessorBase
+	Field       Field      `json:"field" yaml:"field"`                                                                 // The field to be sorted. Required.
+	Order       *SortOrder `json:"order,omitempty" jsonschema:"enum=asc,enum=desc,default=asc" yaml:"order,omitempty"` // The sort order to use. Accepts `"asc"` or `"desc"`.
+	TargetField *Field     `json:"target_field,omitempty" yaml:"target_field,omitempty"`                               // The field to assign the sorted value to. By default, the field is updated in-place.
 }
 
 /*
@@ -1006,16 +871,12 @@ Reference: [split processor]
 [split processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/split-processor.html
 */
 type SplitProcessor struct {
-	Description      *string              `json:"description,omitempty" yaml:"description,omitempty"`                                        // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If               *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                          // Conditionally execute the processor.
-	IgnoreFailure    *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                  // Ignore failures for the processor.
-	OnFailure        []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                          // Handle failures for the processor.
-	Tag              *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                        // Identifier for the processor. Useful for debugging and metrics.
-	Field            Field                `json:"field" yaml:"field"`                                                                        // The field to split. Required.
-	IgnoreMissing    *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`       // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
-	PreserveTrailing *bool                `json:"preserve_trailing,omitempty" jsonschema:"default=false" yaml:"preserve_trailing,omitempty"` // Preserves empty trailing fields, if any.
-	Separator        string               `json:"separator" yaml:"separator"`                                                                // A regex which matches the separator, for example, `,` or `\s+`. Required.
-	TargetField      *Field               `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`           // The field to assign the split value to. By default, the field is updated in-place.
+	ProcessorBase
+	Field            Field  `json:"field" yaml:"field"`                                                                        // The field to split. Required.
+	IgnoreMissing    *bool  `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`       // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
+	PreserveTrailing *bool  `json:"preserve_trailing,omitempty" jsonschema:"default=false" yaml:"preserve_trailing,omitempty"` // Preserves empty trailing fields, if any.
+	Separator        string `json:"separator" yaml:"separator"`                                                                // A regex which matches the separator, for example, `,` or `\s+`. Required.
+	TargetField      *Field `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`           // The field to assign the split value to. By default, the field is updated in-place.
 }
 
 /*
@@ -1027,11 +888,7 @@ Reference: [terminate processor]
 [terminate processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/terminate-processor.html
 */
 type TerminateProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`       // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                         // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"` // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`         // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                       // Identifier for the processor. Useful for debugging and metrics.
+	ProcessorBase
 }
 
 /*
@@ -1044,14 +901,10 @@ Reference: [trim processor]
 [trim processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/trim-processor.html
 */
 type TrimProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                  // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                    // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                            // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                    // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                  // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                                                  // The string-valued field to trim whitespace from. Required.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
-	TargetField   *Field               `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`     // The field to assign the trimmed value to. By default, the field is updated in-place.
+	ProcessorBase
+	Field         Field  `json:"field" yaml:"field"`                                                                  // The string-valued field to trim whitespace from. Required.
+	IgnoreMissing *bool  `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
+	TargetField   *Field `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`     // The field to assign the trimmed value to. By default, the field is updated in-place.
 }
 
 /*
@@ -1063,14 +916,10 @@ Reference: [uppercase processor]
 [uppercase processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/uppercase-processor.html
 */
 type UppercaseProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                  // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                    // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                            // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                    // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                  // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                                                  // The field to make uppercase. Required.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
-	TargetField   *Field               `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`     // The field to assign the converted value to. By default, the field is updated in-place.
+	ProcessorBase
+	Field         Field  `json:"field" yaml:"field"`                                                                  // The field to make uppercase. Required.
+	IgnoreMissing *bool  `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
+	TargetField   *Field `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`     // The field to assign the converted value to. By default, the field is updated in-place.
 }
 
 /*
@@ -1079,16 +928,12 @@ an object. This URI object includes properties for the URI’s domain, path,
 fragment, port, query, scheme, user info, username, and password.
 */
 type UriPartsProcessor struct {
-	Description        *string              `json:"description,omitempty" yaml:"description,omitempty"`                                              // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If                 *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                                // Conditionally execute the processor.
-	IgnoreFailure      *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                        // Ignore failures for the processor.
-	OnFailure          []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                                // Handle failures for the processor.
-	Tag                *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                              // Identifier for the processor. Useful for debugging and metrics.
-	Field              Field                `json:"field" yaml:"field"`                                                                              // Field containing the URI string. Required.
-	IgnoreMissing      *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`             // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
-	KeepOriginal       *bool                `json:"keep_original,omitempty" jsonschema:"default=true" yaml:"keep_original,omitempty"`                // If `true`, the processor copies the unparsed URI to `<target_field>.original`.
-	RemoveIfSuccessful *bool                `json:"remove_if_successful,omitempty" jsonschema:"default=false" yaml:"remove_if_successful,omitempty"` // If `true`, the processor removes the `field` after parsing the URI string. If parsing fails, the processor does not remove the `field`.
-	TargetField        *Field               `json:"target_field,omitempty" jsonschema:"default=url" yaml:"target_field,omitempty"`                   // Output field for the URI object.
+	ProcessorBase
+	Field              Field  `json:"field" yaml:"field"`                                                                              // Field containing the URI string. Required.
+	IgnoreMissing      *bool  `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`             // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
+	KeepOriginal       *bool  `json:"keep_original,omitempty" jsonschema:"default=true" yaml:"keep_original,omitempty"`                // If `true`, the processor copies the unparsed URI to `<target_field>.original`.
+	RemoveIfSuccessful *bool  `json:"remove_if_successful,omitempty" jsonschema:"default=false" yaml:"remove_if_successful,omitempty"` // If `true`, the processor removes the `field` after parsing the URI string. If parsing fails, the processor does not remove the `field`.
+	TargetField        *Field `json:"target_field,omitempty" jsonschema:"default=url" yaml:"target_field,omitempty"`                   // Output field for the URI object.
 }
 
 /*
@@ -1100,14 +945,10 @@ Reference: [urldecode processor]
 [urldecode processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/urldecode-processor.html
 */
 type UrlDecodeProcessor struct {
-	Description   *string              `json:"description,omitempty" yaml:"description,omitempty"`                                  // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If            *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                    // Conditionally execute the processor.
-	IgnoreFailure *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                            // Ignore failures for the processor.
-	OnFailure     []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                    // Handle failures for the processor.
-	Tag           *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                  // Identifier for the processor. Useful for debugging and metrics.
-	Field         Field                `json:"field" yaml:"field"`                                                                  // The field to decode. Required.
-	IgnoreMissing *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
-	TargetField   *Field               `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`     // The field to assign the converted value to. By default, the field is updated in-place.
+	ProcessorBase
+	Field         Field  `json:"field" yaml:"field"`                                                                  // The field to decode. Required.
+	IgnoreMissing *bool  `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
+	TargetField   *Field `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`     // The field to assign the converted value to. By default, the field is updated in-place.
 }
 
 /*
@@ -1120,15 +961,11 @@ Reference: [user_agent processor]
 [user_agent processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/user-agent-processor.html
 */
 type UserAgentProcessor struct {
-	Description       *string              `json:"description,omitempty" yaml:"description,omitempty"`                                                                                                                                                             // Description of the processor. Useful for describing the purpose of the processor or its configuration.
-	If                *string              `json:"if,omitempty" yaml:"if,omitempty"`                                                                                                                                                                               // Conditionally execute the processor.
-	IgnoreFailure     *bool                `json:"ignore_failure,omitempty" yaml:"ignore_failure,omitempty"`                                                                                                                                                       // Ignore failures for the processor.
-	OnFailure         []ProcessorContainer `json:"on_failure,omitempty" yaml:"on_failure,omitempty"`                                                                                                                                                               // Handle failures for the processor.
-	Tag               *string              `json:"tag,omitempty" yaml:"tag,omitempty"`                                                                                                                                                                             // Identifier for the processor. Useful for debugging and metrics.
-	Field             Field                `json:"field" yaml:"field"`                                                                                                                                                                                             // The field containing the user agent string. Required.
-	IgnoreMissing     *bool                `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`                                                                                                                            // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
-	RegexFile         *string              `json:"regex_file,omitempty" yaml:"regex_file,omitempty"`                                                                                                                                                               // The name of the file in the `config/ingest-user-agent` directory containing the regular expressions for parsing the user agent string. Both the directory and the file have to be created before starting Elasticsearch. If not specified, ingest-user-agent will use the `regexes.yaml` from uap-core it ships with.
-	TargetField       *Field               `json:"target_field,omitempty" jsonschema:"default=user_agent" yaml:"target_field,omitempty"`                                                                                                                           // The field that will be filled with the user agent details.
-	Properties        []UserAgentProperty  `json:"properties,omitempty" jsonschema:"default=name,default=major,default=minor,default=patch,default=build,default=os,default=os_name,default=os_major,default=os_minor,default=device" yaml:"properties,omitempty"` // Controls what properties are added to `target_field`.
-	ExtractDeviceType *bool                `json:"extract_device_type,omitempty" jsonschema:"default=false" yaml:"extract_device_type,omitempty"`                                                                                                                  // Extracts device type from the user agent string on a best-effort basis.
+	ProcessorBase
+	Field             Field               `json:"field" yaml:"field"`                                                                                                                                                                                             // The field containing the user agent string. Required.
+	IgnoreMissing     *bool               `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`                                                                                                                            // If `true` and `field` does not exist, the processor quietly exits without modifying the document.
+	RegexFile         *string             `json:"regex_file,omitempty" yaml:"regex_file,omitempty"`                                                                                                                                                               // The name of the file in the `config/ingest-user-agent` directory containing the regular expressions for parsing the user agent string. Both the directory and the file have to be created before starting Elasticsearch. If not specified, ingest-user-agent will use the `regexes.yaml` from uap-core it ships with.
+	TargetField       *Field              `json:"target_field,omitempty" jsonschema:"default=user_agent" yaml:"target_field,omitempty"`                                                                                                                           // The field that will be filled with the user agent details.
+	Properties        []UserAgentProperty `json:"properties,omitempty" jsonschema:"default=name,default=major,default=minor,default=patch,default=build,default=os,default=os_name,default=os_major,default=os_minor,default=device" yaml:"properties,omitempty"` // Controls what properties are added to `target_field`.
+	ExtractDeviceType *bool               `json:"extract_device_type,omitempty" jsonschema:"default=false" yaml:"extract_device_type,omitempty"`                                                                                                                  // Extracts device type from the user agent string on a best-effort basis.
 }
