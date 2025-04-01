@@ -2269,6 +2269,12 @@
         },
         "lang": {
           "type": "string",
+          "enum": [
+            "painless",
+            "expression",
+            "mustache",
+            "java"
+          ],
           "description": "Script language.",
           "default": "painless"
         },
