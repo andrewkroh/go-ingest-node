@@ -15,6 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
+// Package codegen generates Go code from the elasticsearch-specification.
+// It is used to generate the data model for the Ingest Node pipelines.
 package codegen
 
 import (
@@ -95,10 +97,12 @@ func init() {
 	licenseHeader = sb.String()
 }
 
+// Generator generates Go code from the elasticsearch-specification.
 type Generator struct {
 	allTypes map[spec.TypeName]*spec.TypeDefinition
 }
 
+// New creates a new code generator.
 func New(model *spec.Model) *Generator {
 	b := &Generator{
 		allTypes: map[spec.TypeName]*spec.TypeDefinition{},
@@ -116,6 +120,10 @@ func New(model *spec.Model) *Generator {
 	return b
 }
 
+// BuildCode generates Go code based on the provided typeSelector.
+// The typeSelector function is used to filter the types that will be
+// included in the generated code. The output is written to the provided
+// io.Writer.
 func (b *Generator) BuildCode(w io.Writer, typeSelector func(name, inherits spec.TypeName) bool) error {
 	selected := map[spec.TypeName]*spec.TypeDefinition{}
 	deps := map[spec.TypeName]bool{}
@@ -319,8 +327,8 @@ func (b *Generator) goStruct(ifc *spec.Interface, f *jen.File) error {
 
 	var err error
 	f.Type().Id(ifc.TypeName.Name).StructFunc(func(g *jen.Group) {
-		if ifc.Inherits.TypeName.Name != "" {
-			g.Id(ifc.Inherits.TypeName.Name)
+		if ifc.Inherits.Name != "" {
+			g.Id(ifc.Inherits.Name)
 		}
 		b.addProperties(g, ifc.Properties)
 	})
@@ -335,7 +343,7 @@ func (b *Generator) depsOfType(t *spec.TypeDefinition, deps map[spec.TypeName]bo
 
 	switch v := t.Value.(type) {
 	case spec.Interface:
-		if v.Inherits.TypeName.Name != "" {
+		if v.Inherits.Name != "" {
 			deps[v.Inherits.TypeName] = true
 			if parent, found := b.allTypes[v.Inherits.TypeName]; found {
 				b.depsOfType(parent, deps)
@@ -353,17 +361,17 @@ func (b *Generator) depsOfType(t *spec.TypeDefinition, deps map[spec.TypeName]bo
 func (b *Generator) depsOfValue(v *spec.ValueOf, deps map[spec.TypeName]bool) {
 	switch {
 	case v.InstanceOf != nil:
-		if _, visited := deps[v.InstanceOf.TypeName]; !visited {
-			deps[v.InstanceOf.TypeName] = true
-			b.depsOfType(b.allTypes[v.InstanceOf.TypeName], deps)
+		if _, visited := deps[v.TypeName]; !visited {
+			deps[v.TypeName] = true
+			b.depsOfType(b.allTypes[v.TypeName], deps)
 		}
 	case v.ArrayOf != nil:
 		b.depsOfValue(v.ArrayOf.Value, deps)
 	case v.DictionaryOf != nil:
-		b.depsOfValue(v.DictionaryOf.Key, deps)
+		b.depsOfValue(v.Key, deps)
 		b.depsOfValue(v.DictionaryOf.Value, deps)
 	case v.UnionOf != nil:
-		for _, item := range v.UnionOf.Items {
+		for _, item := range v.Items {
 			b.depsOfValue(item, deps)
 		}
 	}
@@ -372,10 +380,10 @@ func (b *Generator) depsOfValue(v *spec.ValueOf, deps map[spec.TypeName]bool) {
 func identifier(v *spec.ValueOf) string {
 	switch {
 	case v.InstanceOf != nil:
-		if o := overrides[qualifiedName(v.InstanceOf.Namespace, v.InstanceOf.TypeName.Name)]; o != "" {
+		if o := overrides[qualifiedName(v.Namespace, v.Name)]; o != "" {
 			return o
 		}
-		return v.InstanceOf.TypeName.Name
+		return v.Name
 	case v.ArrayOf != nil:
 		return identifier(v.ArrayOf.Value)
 	case v.UnionOf != nil:
@@ -387,7 +395,7 @@ func identifier(v *spec.ValueOf) string {
 	case v.LiteralValue != nil:
 		return fmt.Sprintf("%s", v.LiteralValue.Value)
 	case v.DictionaryOf != nil:
-		return fmt.Sprintf("map[%s]%s", identifier(v.DictionaryOf.Key), identifier(v.DictionaryOf.Value))
+		return fmt.Sprintf("map[%s]%s", identifier(v.Key), identifier(v.DictionaryOf.Value))
 	}
 	return ""
 }
@@ -413,7 +421,7 @@ func goIDName(name string) string {
 			continue
 		}
 
-		allParts[i] = strings.Title(p)
+		allParts[i] = strings.Title(p) //nolint:staticcheck // strings.Title seems sufficient for capitalizing identifiers.
 	}
 
 	return strings.Join(allParts, "")

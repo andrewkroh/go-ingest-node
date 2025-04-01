@@ -18,7 +18,6 @@ linters:
   settings:
     staticcheck:
       checks:
-        - -SA1019
         - all
   exclusions:
     generated: lax
@@ -30,6 +29,11 @@ linters:
       - third_party$
       - builtin$
       - examples$
+    rules:
+      - path: internal/generator/internal/spec/types.go
+        linters:
+          - revive
+        text: "should have comment or be unexported"
 formatters:
   enable:
     - gofumpt

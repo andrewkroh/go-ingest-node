@@ -15,6 +15,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
+// The generator command line tool generates Go code for representing
+// Elasticsearch Ingest Node data types. It generates code based on the
+// elasticsearch-specification.
 package main
 
 import (

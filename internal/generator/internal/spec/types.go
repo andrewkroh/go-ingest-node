@@ -25,6 +25,7 @@ import (
 	"reflect"
 )
 
+// Model represents the top-level structure of the elasticsearch-specification schema.
 type Model struct {
 	Types []TypeDefinition `json:"types,omitempty"`
 }
