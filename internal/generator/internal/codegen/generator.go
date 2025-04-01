@@ -50,7 +50,8 @@ var overrides = map[string]string{
 	// _types.Script, to be a string type instead of a struct. This is a
 	// workaround solving issue:
 	// https://github.com/andrewkroh/go-ingest-node/issues/15.
-	"_types.Script": "string",
+	"_types.Script":       "string",
+	"_types.ScriptSource": "string",
 }
 
 // acronyms is a set of acronyms that should be capitalized in identifiers.
@@ -117,8 +118,15 @@ func New(model *spec.Model) *Generator {
 }
 
 func (b *Generator) BuildCode(w io.Writer, typeSelector func(name, inherits spec.TypeName) bool) error {
+	// Mark the overrides as visited dependencies so that those types and
+	// their dependencies are not included in the generated code.
+	deps := make(map[spec.TypeName]bool, len(overrides))
+	for k := range overrides {
+		parts := strings.SplitN(k, ".", 2)
+		deps[spec.TypeName{Namespace: parts[0], Name: parts[1]}] = true
+	}
+
 	selected := map[spec.TypeName]*spec.TypeDefinition{}
-	deps := map[spec.TypeName]bool{}
 
 	for n, t := range b.allTypes {
 		var name, inherits spec.TypeName
