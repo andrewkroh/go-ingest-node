@@ -806,10 +806,10 @@ Reference: [script processor]
 */
 type ScriptProcessor struct {
 	ProcessorBase
-	ID     *Id            `json:"id,omitempty" yaml:"id,omitempty"`                                   // ID of a stored script. If no `source` is specified, this parameter is required.
-	Lang   *string        `json:"lang,omitempty" jsonschema:"default=painless" yaml:"lang,omitempty"` // Script language.
-	Params map[string]any `json:"params,omitempty" yaml:"params,omitempty"`                           // Object containing parameters for the script.
-	Source *string        `json:"source,omitempty" yaml:"source,omitempty"`                           // Inline script. If no `id` is specified, this parameter is required.
+	ID     *Id             `json:"id,omitempty" yaml:"id,omitempty"`                                                                                         // ID of a stored script. If no `source` is specified, this parameter is required.
+	Lang   *ScriptLanguage `json:"lang,omitempty" jsonschema:"enum=painless,enum=expression,enum=mustache,enum=java,default=painless" yaml:"lang,omitempty"` // Script language.
+	Params map[string]any  `json:"params,omitempty" yaml:"params,omitempty"`                                                                                 // Object containing parameters for the script.
+	Source *string         `json:"source,omitempty" yaml:"source,omitempty"`                                                                                 // Inline script. If no `id` is specified, this parameter is required.
 }
 
 /*
