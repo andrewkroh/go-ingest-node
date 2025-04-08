@@ -528,6 +528,13 @@ type InferenceProcessor struct {
 	TargetField     *Field           `json:"target_field,omitempty" jsonschema:"default=ml.inference.<processor_tag>" yaml:"target_field,omitempty"` // Field added to incoming documents to contain results objects.
 	FieldMap        map[string]any   `json:"field_map,omitempty" yaml:"field_map,omitempty"`                                                         // Maps the document field names to the known field names of the model. This mapping takes precedence over any default mappings provided in the model configuration.
 	InferenceConfig *InferenceConfig `json:"inference_config,omitempty" yaml:"inference_config,omitempty"`                                           // Contains the inference type and its options.
+	InputOutput     any              `json:"input_output,omitempty" yaml:"input_output,omitempty"`                                                   // Input fields for inference and output (destination) fields for the inference results. This option is incompatible with the target_field and field_map options.
+	IgnoreMissing   *bool            `json:"ignore_missing,omitempty" yaml:"ignore_missing,omitempty"`                                               // If true and any of the input fields defined in input_ouput are missing then those missing fields are quietly ignored, otherwise a missing field causes a failure. Only applies when using input_output configurations to explicitly list the input fields.
+}
+
+type InputConfig struct {
+	InputField  string `json:"input_field" yaml:"input_field"`
+	OutputField string `json:"output_field" yaml:"output_field"`
 }
 
 // Currently an undocumented alias for GeoIP Processor.

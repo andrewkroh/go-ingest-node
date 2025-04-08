@@ -1338,6 +1338,13 @@
         "inference_config": {
           "$ref": "#/$defs/InferenceConfig",
           "description": "Contains the inference type and its options."
+        },
+        "input_output": {
+          "description": "Input fields for inference and output (destination) fields for the inference results. This option is incompatible with the target_field and field_map options."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If true and any of the input fields defined in input_ouput are missing then those missing fields are quietly ignored, otherwise a missing field causes a failure. Only applies when using input_output configurations to explicitly list the input fields."
         }
       },
       "additionalProperties": false,
