@@ -136,7 +136,7 @@ of values.
 
 Reference: [append processor]
 
-[append processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/append-processor.html
+[append processor]: https://www.elastic.co/docs/reference/enrich-processor/append-processor
 */
 type AppendProcessor struct {
 	ProcessorBase
@@ -152,7 +152,7 @@ Tika.
 
 Reference: [attachment processor]
 
-[attachment processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/attachment.html
+[attachment processor]: https://www.elastic.co/docs/reference/enrich-processor/attachment
 */
 type AttachmentProcessor struct {
 	ProcessorBase
@@ -175,7 +175,7 @@ supported format or resultant value exceeds 2^63.
 
 Reference: [bytes processor]
 
-[bytes processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/bytes-processor.html
+[bytes processor]: https://www.elastic.co/docs/reference/enrich-processor/bytes-processor
 */
 type BytesProcessor struct {
 	ProcessorBase
@@ -190,7 +190,7 @@ them.
 
 Reference: [circle processor]
 
-[circle processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest-circle-processor.html
+[circle processor]: https://www.elastic.co/docs/reference/enrich-processor/ingest-circle-processor
 */
 type CircleProcessor struct {
 	ProcessorBase
@@ -208,7 +208,7 @@ a single flow.
 
 Reference: [community_id processor]
 
-[community_id processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/community-id-processor.html
+[community_id processor]: https://www.elastic.co/docs/reference/enrich-processor/community-id-processor
 */
 type CommunityIDProcessor struct {
 	ProcessorBase
@@ -232,7 +232,7 @@ will be converted.
 
 Reference: [convert processor]
 
-[convert processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/convert-processor.html
+[convert processor]: https://www.elastic.co/docs/reference/enrich-processor/convert-processor
 */
 type ConvertProcessor struct {
 	ProcessorBase
@@ -248,7 +248,7 @@ empty field in CSV will be skipped.
 
 Reference: [csv processor]
 
-[csv processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/csv-processor.html
+[csv processor]: https://www.elastic.co/docs/reference/enrich-processor/csv-processor
 */
 type CsvProcessor struct {
 	ProcessorBase
@@ -268,7 +268,7 @@ index name support.
 
 Reference: [date_index_name processor]
 
-[date_index_name processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/date-index-name-processor.html
+[date_index_name processor]: https://www.elastic.co/docs/reference/enrich-processor/date-index-name-processor
 */
 type DateIndexNameProcessor struct {
 	ProcessorBase
@@ -287,7 +287,7 @@ for the document.
 
 Reference: [date processor]
 
-[date processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/date-processor.html
+[date processor]: https://www.elastic.co/docs/reference/enrich-processor/date-processor
 */
 type DateProcessor struct {
 	ProcessorBase
@@ -305,7 +305,7 @@ against a delimiter-based pattern.
 
 Reference: [dissect processor]
 
-[dissect processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/dissect-processor.html
+[dissect processor]: https://www.elastic.co/docs/reference/enrich-processor/dissect-processor
 */
 type DissectProcessor struct {
 	ProcessorBase
@@ -322,7 +322,7 @@ Otherwise these fields can’t be accessed by any processor.
 
 Reference: [dot_expander processor]
 
-[dot_expander processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/dot-expand-processor.html
+[dot_expander processor]: https://www.elastic.co/docs/reference/enrich-processor/dot-expand-processor
 */
 type DotExpanderProcessor struct {
 	ProcessorBase
@@ -337,7 +337,7 @@ document from getting indexed based on some condition.
 
 Reference: [drop processor]
 
-[drop processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/drop-processor.html
+[drop processor]: https://www.elastic.co/docs/reference/enrich-processor/drop-processor
 */
 type DropProcessor struct {
 	ProcessorBase
@@ -348,7 +348,7 @@ The `enrich` processor can enrich documents with data from another index.
 
 Reference: [enrich processor]
 
-[enrich processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/enrich-processor.html
+[enrich processor]: https://www.elastic.co/docs/reference/enrich-processor/enrich-processor
 */
 type EnrichProcessor struct {
 	ProcessorBase
@@ -367,7 +367,7 @@ want to relay a specific message to the requester.
 
 Reference: [fail processor]
 
-[fail processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/fail-processor.html
+[fail processor]: https://www.elastic.co/docs/reference/enrich-processor/fail-processor
 */
 type FailProcessor struct {
 	ProcessorBase
@@ -380,7 +380,7 @@ fingerprinting.
 
 Reference: [fingerprint processor]
 
-[fingerprint processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/fingerprint-processor.html
+[fingerprint processor]: https://www.elastic.co/docs/reference/enrich-processor/fingerprint-processor
 */
 type FingerprintProcessor struct {
 	ProcessorBase
@@ -396,7 +396,7 @@ Runs an ingest processor on each element of an array or object.
 
 Reference: [foreach processor]
 
-[foreach processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/foreach-processor.html
+[foreach processor]: https://www.elastic.co/docs/reference/enrich-processor/foreach-processor
 */
 type ForeachProcessor struct {
 	ProcessorBase
@@ -412,7 +412,7 @@ interact with the tile shapes as spatially indexable fields.
 
 Reference: [geo_grid processor]
 
-[geo_grid processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest-geo-grid-processor.html
+[geo_grid processor]: https://www.elastic.co/docs/reference/enrich-processor/ingest-geo-grid-processor
 */
 type GeoGridProcessor struct {
 	ProcessorBase
@@ -433,7 +433,7 @@ IPv4 or IPv6 address.
 
 Reference: [geoip processor]
 
-[geoip processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/geoip-processor.html
+[geoip processor]: https://www.elastic.co/docs/reference/enrich-processor/geoip-processor
 */
 type GeoIpProcessor struct {
 	ProcessorBase
@@ -454,7 +454,7 @@ aliased expressions that can be reused.
 
 Reference: [grok processor]
 
-[grok processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/grok-processor.html
+[grok processor]: https://www.elastic.co/docs/reference/enrich-processor/grok-processor
 */
 type GrokProcessor struct {
 	ProcessorBase
@@ -473,7 +473,7 @@ any non-string values are encountered, the processor will throw an exception.
 
 Reference: [gsub processor]
 
-[gsub processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/gsub-processor.html
+[gsub processor]: https://www.elastic.co/docs/reference/enrich-processor/gsub-processor
 */
 type GsubProcessor struct {
 	ProcessorBase
@@ -520,7 +520,7 @@ the pipeline.
 
 Reference: [inference processor]
 
-[inference processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/inference-processor.html
+[inference processor]: https://www.elastic.co/docs/reference/enrich-processor/inference-processor
 */
 type InferenceProcessor struct {
 	ProcessorBase
@@ -555,7 +555,7 @@ between each element. Throws an error when the field is not an array.
 
 Reference: [join processor]
 
-[join processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/join-processor.html
+[join processor]: https://www.elastic.co/docs/reference/enrich-processor/join-processor
 */
 type JoinProcessor struct {
 	ProcessorBase
@@ -569,7 +569,7 @@ Converts a JSON string into a structured JSON object.
 
 Reference: [json processor]
 
-[json processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/json-processor.html
+[json processor]: https://www.elastic.co/docs/reference/enrich-processor/json-processor
 */
 type JsonProcessor struct {
 	ProcessorBase
@@ -586,7 +586,7 @@ which are of the `foo=bar` variety.
 
 Reference: [kv processor]
 
-[kv processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/kv-processor.html
+[kv processor]: https://www.elastic.co/docs/reference/enrich-processor/kv-processor
 */
 type KeyValueProcessor struct {
 	ProcessorBase
@@ -609,7 +609,7 @@ strings, all members of the array will be converted.
 
 Reference: [lowercase processor]
 
-[lowercase processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/lowercase-processor.html
+[lowercase processor]: https://www.elastic.co/docs/reference/enrich-processor/lowercase-processor
 */
 type LowercaseProcessor struct {
 	ProcessorBase
@@ -624,7 +624,7 @@ address, and a list of internal networks.
 
 Reference: [network_direction processor]
 
-[network_direction processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/network-direction-processor.html
+[network_direction processor]: https://www.elastic.co/docs/reference/enrich-processor/network-direction-processor
 */
 type NetworkDirectionProcessor struct {
 	ProcessorBase
@@ -650,7 +650,7 @@ Executes another pipeline.
 
 Reference: [pipeline processor]
 
-[pipeline processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/pipeline-processor.html
+[pipeline processor]: https://www.elastic.co/docs/reference/enrich-processor/pipeline-processor
 */
 type PipelineProcessor struct {
 	ProcessorBase
@@ -724,7 +724,7 @@ matched or simply replace all matches with the text `<REDACTED>` if preferred.
 
 Reference: [redact processor]
 
-[redact processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/redact-processor.html
+[redact processor]: https://www.elastic.co/docs/reference/enrich-processor/redact-processor
 */
 type RedactProcessor struct {
 	ProcessorBase
@@ -745,7 +745,7 @@ eTLD), sub-domain, and top-level domain from a fully qualified domain name
 
 Reference: [registered_domain processor]
 
-[registered_domain processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/registered-domain-processor.html
+[registered_domain processor]: https://www.elastic.co/docs/reference/enrich-processor/registered-domain-processor
 */
 type RegisteredDomainProcessor struct {
 	ProcessorBase
@@ -760,7 +760,7 @@ thrown.
 
 Reference: [remove processor]
 
-[remove processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/remove-processor.html
+[remove processor]: https://www.elastic.co/docs/reference/enrich-processor/remove-processor
 */
 type RemoveProcessor struct {
 	ProcessorBase
@@ -775,7 +775,7 @@ used, an exception will be thrown.
 
 Reference: [rename processor]
 
-[rename processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/rename-processor.html
+[rename processor]: https://www.elastic.co/docs/reference/enrich-processor/rename-processor
 */
 type RenameProcessor struct {
 	ProcessorBase
@@ -794,7 +794,7 @@ scheme.
 
 Reference: [reroute processor]
 
-[reroute processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/reroute-processor.html
+[reroute processor]: https://www.elastic.co/docs/reference/enrich-processor/reroute-processor
 */
 type RerouteProcessor struct {
 	ProcessorBase
@@ -809,7 +809,7 @@ Runs an inline or stored script on incoming documents. The script runs in the
 
 Reference: [script processor]
 
-[script processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/script-processor.html
+[script processor]: https://www.elastic.co/docs/reference/enrich-processor/script-processor
 */
 type ScriptProcessor struct {
 	ProcessorBase
@@ -825,7 +825,7 @@ will be replaced with the provided one.
 
 Reference: [set processor]
 
-[set processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/set-processor.html
+[set processor]: https://www.elastic.co/docs/reference/enrich-processor/set-processor
 */
 type SetProcessor struct {
 	ProcessorBase
@@ -860,7 +860,7 @@ when the field is not an array.
 
 Reference: [sort processor]
 
-[sort processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/sort-processor.html
+[sort processor]: https://www.elastic.co/docs/reference/enrich-processor/sort-processor
 */
 type SortProcessor struct {
 	ProcessorBase
@@ -875,7 +875,7 @@ fields.
 
 Reference: [split processor]
 
-[split processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/split-processor.html
+[split processor]: https://www.elastic.co/docs/reference/enrich-processor/split-processor
 */
 type SplitProcessor struct {
 	ProcessorBase
@@ -892,7 +892,7 @@ This will normally be executed conditionally, using the `if` option.
 
 Reference: [terminate processor]
 
-[terminate processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/terminate-processor.html
+[terminate processor]: https://www.elastic.co/docs/reference/enrich-processor/terminate-processor
 */
 type TerminateProcessor struct {
 	ProcessorBase
@@ -905,7 +905,7 @@ whitespace.
 
 Reference: [trim processor]
 
-[trim processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/trim-processor.html
+[trim processor]: https://www.elastic.co/docs/reference/enrich-processor/trim-processor
 */
 type TrimProcessor struct {
 	ProcessorBase
@@ -920,7 +920,7 @@ strings, all members of the array will be converted.
 
 Reference: [uppercase processor]
 
-[uppercase processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/uppercase-processor.html
+[uppercase processor]: https://www.elastic.co/docs/reference/enrich-processor/uppercase-processor
 */
 type UppercaseProcessor struct {
 	ProcessorBase
@@ -949,7 +949,7 @@ array will be decoded.
 
 Reference: [urldecode processor]
 
-[urldecode processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/urldecode-processor.html
+[urldecode processor]: https://www.elastic.co/docs/reference/enrich-processor/urldecode-processor
 */
 type UrlDecodeProcessor struct {
 	ProcessorBase
@@ -965,7 +965,7 @@ under the `user_agent` field.
 
 Reference: [user_agent processor]
 
-[user_agent processor]: https://www.elastic.co/guide/en/elasticsearch/reference/current/user-agent-processor.html
+[user_agent processor]: https://www.elastic.co/docs/reference/enrich-processor/user-agent-processor
 */
 type UserAgentProcessor struct {
 	ProcessorBase
