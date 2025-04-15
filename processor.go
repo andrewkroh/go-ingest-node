@@ -844,7 +844,7 @@ authenticated user to the current document by pre-processing the ingest.
 
 Reference: [set_security_user processor]
 
-[set_security_user processor]: https://www.elastic.co/guide/en/elasticsearch/reference/{banch}/ingest-node-set-security-user-processor.html
+[set_security_user processor]: https://www.elastic.co/docs/reference/enrich-processor/ingest-node-set-security-user-processor
 */
 type SetSecurityUserProcessor struct {
 	ProcessorBase
