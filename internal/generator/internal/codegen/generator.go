@@ -54,6 +54,12 @@ var overrides = map[string]string{
 	// https://github.com/andrewkroh/go-ingest-node/issues/15.
 	"_types.Script":       "string",
 	"_types.ScriptSource": "string",
+
+	// NOTE: The generator should ideally be looking at the generic type
+	// parameters to determine the underlying data type and create a specific
+	// Go type like EpochTimeMillis.
+	// https://github.com/elastic/elasticsearch-specification/commit/2154fc3cce09605c6fe28523be66686a1c6fe056#diff-dd279dbec99794cf0554bb4ab6cfa07b69739d902bb5f178623e0a639087f0e7R120740-R120753
+	"_types.EpochTime": "int64",
 }
 
 // acronyms is a set of acronyms that should be capitalized in identifiers.
