@@ -33,7 +33,11 @@
           "description": "The field to be appended to. Supports template snippets. Required."
         },
         "value": {
-          "description": "The value to be appended. Supports template snippets. Required."
+          "description": "The value to be appended. Supports template snippets. May specify only one of `value` or `copy_from`."
+        },
+        "copy_from": {
+          "type": "string",
+          "description": "The origin field which will be appended to `field`, cannot set `value` simultaneously."
         },
         "allow_duplicates": {
           "type": "boolean",
@@ -44,8 +48,7 @@
       "additionalProperties": false,
       "type": "object",
       "required": [
-        "field",
-        "value"
+        "field"
       ],
       "description": "Appends one or more values to an existing array if the field already exists and it is an array."
     },

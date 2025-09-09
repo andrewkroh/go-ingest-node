@@ -141,9 +141,10 @@ Reference: [append processor]
 */
 type AppendProcessor struct {
 	ProcessorBase
-	Field           Field `json:"field" yaml:"field"`                                                                     // The field to be appended to. Supports template snippets. Required.
-	Value           any   `json:"value" yaml:"value"`                                                                     // The value to be appended. Supports template snippets. Required.
-	AllowDuplicates *bool `json:"allow_duplicates,omitempty" jsonschema:"default=true" yaml:"allow_duplicates,omitempty"` // If `false`, the processor does not append values already present in the field.
+	Field           Field  `json:"field" yaml:"field"`                                                                     // The field to be appended to. Supports template snippets. Required.
+	Value           any    `json:"value,omitempty" yaml:"value,omitempty"`                                                 // The value to be appended. Supports template snippets. May specify only one of `value` or `copy_from`.
+	CopyFrom        *Field `json:"copy_from,omitempty" yaml:"copy_from,omitempty"`                                         // The origin field which will be appended to `field`, cannot set `value` simultaneously.
+	AllowDuplicates *bool  `json:"allow_duplicates,omitempty" jsonschema:"default=true" yaml:"allow_duplicates,omitempty"` // If `false`, the processor does not append values already present in the field.
 }
 
 /*
