@@ -1776,6 +1776,15 @@
         "modified_date_millis": {
           "type": "integer",
           "description": "Date and time when the pipeline was last modified, in milliseconds since the epoch."
+        },
+        "field_access_pattern": {
+          "type": "string",
+          "enum": [
+            "classic",
+            "flexible"
+          ],
+          "description": "Controls how processors in this pipeline should read and write data on a document's source.",
+          "default": "classic"
         }
       },
       "additionalProperties": false,
