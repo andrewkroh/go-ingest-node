@@ -2812,15 +2812,10 @@
           "description": "Controls what properties are added to `target_field`.",
           "default": [
             "name",
-            "major",
-            "minor",
-            "patch",
-            "build",
             "os",
-            "os_name",
-            "os_major",
-            "os_minor",
-            "device"
+            "device",
+            "original",
+            "version"
           ]
         },
         "extract_device_type": {
