@@ -148,10 +148,12 @@ Reference: [append processor]
 */
 type AppendProcessor struct {
 	ProcessorBase
-	Field           Field  `json:"field" yaml:"field"`                                                                     // The field to be appended to. Supports template snippets. Required.
-	Value           any    `json:"value,omitempty" yaml:"value,omitempty"`                                                 // The value to be appended. Supports template snippets. May specify only one of `value` or `copy_from`.
-	CopyFrom        *Field `json:"copy_from,omitempty" yaml:"copy_from,omitempty"`                                         // The origin field which will be appended to `field`, cannot set `value` simultaneously.
-	AllowDuplicates *bool  `json:"allow_duplicates,omitempty" jsonschema:"default=true" yaml:"allow_duplicates,omitempty"` // If `false`, the processor does not append values already present in the field.
+	Field             Field   `json:"field" yaml:"field"`                                                                            // The field to be appended to. Supports template snippets. Required.
+	Value             any     `json:"value,omitempty" yaml:"value,omitempty"`                                                        // The value to be appended. Supports template snippets. May specify only one of `value` or `copy_from`.
+	MediaType         *string `json:"media_type,omitempty" jsonschema:"default=application/json" yaml:"media_type,omitempty"`        // The media type for encoding `value`. Applies only when value is a template snippet. Must be one of `application/json`, `text/plain`, or `application/x-www-form-urlencoded`.
+	CopyFrom          *Field  `json:"copy_from,omitempty" yaml:"copy_from,omitempty"`                                                // The origin field which will be appended to `field`, cannot set `value` simultaneously.
+	AllowDuplicates   *bool   `json:"allow_duplicates,omitempty" jsonschema:"default=true" yaml:"allow_duplicates,omitempty"`        // If `false`, the processor does not append values already present in the field.
+	IgnoreEmptyValues *bool   `json:"ignore_empty_values,omitempty" jsonschema:"default=false" yaml:"ignore_empty_values,omitempty"` // If `true`, the processor will skip empty values from the source (e.g. empty strings, and null values), rather than appending them to the field.
 }
 
 /*
@@ -191,6 +193,22 @@ type BytesProcessor struct {
 	Field         Field  `json:"field" yaml:"field"`                                                                  // The field to convert. Required.
 	IgnoreMissing *bool  `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"` // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
 	TargetField   *Field `json:"target_field,omitempty" jsonschema:"default=field" yaml:"target_field,omitempty"`     // The field to assign the converted value to. By default, the field is updated in-place.
+}
+
+/*
+Converts a CEF message into a structured format.
+
+Reference: [cef processor]
+
+[cef processor]: https://www.elastic.co/docs/reference/enrich-processor/cef-processor
+*/
+type CefProcessor struct {
+	ProcessorBase
+	Field             Field   `json:"field" yaml:"field"`                                                                            // The field containing the CEF message. Required.
+	IgnoreMissing     *bool   `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`           // If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.
+	TargetField       *Field  `json:"target_field,omitempty" jsonschema:"default=cef" yaml:"target_field,omitempty"`                 // The field to assign the converted value to. By default, the `target_field` is 'cef'.
+	IgnoreEmptyValues *bool   `json:"ignore_empty_values,omitempty" jsonschema:"default=false" yaml:"ignore_empty_values,omitempty"` // If `true` and value is anempty string in extensions, the processor quietly exits without modifying the document.
+	Timezone          *string `json:"timezone,omitempty" jsonschema:"default=UTC" yaml:"timezone,omitempty"`                         // The timezone to use when parsing the date and when date math index supports resolves expressions into concrete index names.
 }
 
 /*
@@ -684,6 +702,7 @@ type ProcessorContainer struct {
 	Append           *AppendProcessor           `json:"append,omitempty" yaml:"append,omitempty"`                       // Appends one or more values to an existing array if the field already exists and it is an array. Converts a scalar to an array and appends one or more values to it if the field exists and it is a scalar. Creates an array containing the provided values if the field doesn’t exist. Accepts a single value or an array of values.
 	Attachment       *AttachmentProcessor       `json:"attachment,omitempty" yaml:"attachment,omitempty"`               // The attachment processor lets Elasticsearch extract file attachments in common formats (such as PPT, XLS, and PDF) by using the Apache text extraction library Tika.
 	Bytes            *BytesProcessor            `json:"bytes,omitempty" yaml:"bytes,omitempty"`                         // Converts a human readable byte value (for example `1kb`) to its value in bytes (for example `1024`). If the field is an array of strings, all members of the array will be converted. Supported human readable units are "b", "kb", "mb", "gb", "tb", "pb" case insensitive. An error will occur if the field is not a supported format or resultant value exceeds 2^63.
+	Cef              *CefProcessor              `json:"cef,omitempty" yaml:"cef,omitempty"`                             // Converts a CEF message into a structured format.
 	Circle           *CircleProcessor           `json:"circle,omitempty" yaml:"circle,omitempty"`                       // Converts circle definitions of shapes to regular polygons which approximate them.
 	CommunityID      *CommunityIDProcessor      `json:"community_id,omitempty" yaml:"community_id,omitempty"`           // Computes the Community ID for network flow data as defined in the Community ID Specification. You can use a community ID to correlate network events related to a single flow.
 	Convert          *ConvertProcessor          `json:"convert,omitempty" yaml:"convert,omitempty"`                     // Converts a field in the currently ingested document to a different type, such as converting a string to an integer. If the field value is an array, all members will be converted.
@@ -846,7 +865,7 @@ type SetProcessor struct {
 	CopyFrom         *Field  `json:"copy_from,omitempty" yaml:"copy_from,omitempty"`                                              // The origin field which will be copied to `field`, cannot set `value` simultaneously. Supported data types are `boolean`, `number`, `array`, `object`, `string`, `date`, etc.
 	Field            Field   `json:"field" yaml:"field"`                                                                          // The field to insert, upsert, or update. Supports template snippets. Required.
 	IgnoreEmptyValue *bool   `json:"ignore_empty_value,omitempty" jsonschema:"default=false" yaml:"ignore_empty_value,omitempty"` // If `true` and `value` is a template snippet that evaluates to `null` or the empty string, the processor quietly exits without modifying the document.
-	MediaType        *string `json:"media_type,omitempty" yaml:"media_type,omitempty"`                                            // The media type for encoding `value`. Applies only when value is a template snippet. Must be one of `application/json`, `text/plain`, or `application/x-www-form-urlencoded`.
+	MediaType        *string `json:"media_type,omitempty" jsonschema:"default=application/json" yaml:"media_type,omitempty"`      // The media type for encoding `value`. Applies only when value is a template snippet. Must be one of `application/json`, `text/plain`, or `application/x-www-form-urlencoded`.
 	Override         *bool   `json:"override,omitempty" jsonschema:"default=true" yaml:"override,omitempty"`                      // If `true` processor will update fields with pre-existing non-null-valued field. When set to `false`, such fields will not be touched.
 	Value            any     `json:"value,omitempty" yaml:"value,omitempty"`                                                      // The value to be set for the field. Supports template snippets. May specify only one of `value` or `copy_from`.
 }

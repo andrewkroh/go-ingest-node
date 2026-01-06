@@ -35,6 +35,11 @@
         "value": {
           "description": "The value to be appended. Supports template snippets. May specify only one of `value` or `copy_from`."
         },
+        "media_type": {
+          "type": "string",
+          "description": "The media type for encoding `value`. Applies only when value is a template snippet. Must be one of `application/json`, `text/plain`, or `application/x-www-form-urlencoded`.",
+          "default": "application/json"
+        },
         "copy_from": {
           "type": "string",
           "description": "The origin field which will be appended to `field`, cannot set `value` simultaneously."
@@ -43,6 +48,11 @@
           "type": "boolean",
           "description": "If `false`, the processor does not append values already present in the field.",
           "default": true
+        },
+        "ignore_empty_values": {
+          "type": "boolean",
+          "description": "If `true`, the processor will skip empty values from the source (e.g. empty strings, and null values), rather than appending them to the field.",
+          "default": false
         }
       },
       "additionalProperties": false,
@@ -170,6 +180,63 @@
         "field"
       ],
       "description": "Converts a human readable byte value (for example `1kb`) to its value in bytes (for example `1024`)."
+    },
+    "CefProcessor": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the processor. Useful for describing the purpose of the processor or its configuration."
+        },
+        "if": {
+          "type": "string",
+          "description": "Conditionally execute the processor."
+        },
+        "ignore_failure": {
+          "type": "boolean",
+          "description": "Ignore failures for the processor."
+        },
+        "on_failure": {
+          "items": {
+            "$ref": "#/$defs/ProcessorContainer"
+          },
+          "type": "array",
+          "description": "Handle failures for the processor."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Identifier for the processor. Useful for debugging and metrics."
+        },
+        "field": {
+          "type": "string",
+          "description": "The field containing the CEF message. Required."
+        },
+        "ignore_missing": {
+          "type": "boolean",
+          "description": "If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document.",
+          "default": false
+        },
+        "target_field": {
+          "type": "string",
+          "description": "The field to assign the converted value to. By default, the `target_field` is 'cef'.",
+          "default": "cef"
+        },
+        "ignore_empty_values": {
+          "type": "boolean",
+          "description": "If `true` and value is anempty string in extensions, the processor quietly exits without modifying the document.",
+          "default": false
+        },
+        "timezone": {
+          "type": "string",
+          "description": "The timezone to use when parsing the date and when date math index supports resolves expressions into concrete index names.",
+          "default": "UTC"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "field"
+      ],
+      "description": "Converts a CEF message into a structured format."
     },
     "CircleProcessor": {
       "properties": {
@@ -1846,6 +1913,10 @@
           "$ref": "#/$defs/BytesProcessor",
           "description": "Converts a human readable byte value (for example `1kb`) to its value in bytes (for example `1024`). If the field is an array of strings, all members of the array will be converted. Supported human readable units are \"b\", \"kb\", \"mb\", \"gb\", \"tb\", \"pb\" case insensitive. An error will occur if the field is not a supported format or resultant value exceeds 2^63."
         },
+        "cef": {
+          "$ref": "#/$defs/CefProcessor",
+          "description": "Converts a CEF message into a structured format."
+        },
         "circle": {
           "$ref": "#/$defs/CircleProcessor",
           "description": "Converts circle definitions of shapes to regular polygons which approximate them."
@@ -2364,7 +2435,8 @@
         },
         "media_type": {
           "type": "string",
-          "description": "The media type for encoding `value`. Applies only when value is a template snippet. Must be one of `application/json`, `text/plain`, or `application/x-www-form-urlencoded`."
+          "description": "The media type for encoding `value`. Applies only when value is a template snippet. Must be one of `application/json`, `text/plain`, or `application/x-www-form-urlencoded`.",
+          "default": "application/json"
         },
         "override": {
           "type": "boolean",
