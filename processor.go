@@ -592,7 +592,8 @@ type JoinProcessor struct {
 }
 
 /*
-Converts a JSON string into a structured JSON object.
+Parses a string containing JSON data into a structured object, string, or other
+value.
 
 Reference: [json processor]
 
@@ -724,7 +725,7 @@ type ProcessorContainer struct {
 	HtmlStrip        *HtmlStripProcessor        `json:"html_strip,omitempty" yaml:"html_strip,omitempty"`               // Removes HTML tags from the field. If the field is an array of strings, HTML tags will be removed from all members of the array.
 	Inference        *InferenceProcessor        `json:"inference,omitempty" yaml:"inference,omitempty"`                 // Uses a pre-trained data frame analytics model or a model deployed for natural language processing tasks to infer against the data that is being ingested in the pipeline.
 	Join             *JoinProcessor             `json:"join,omitempty" yaml:"join,omitempty"`                           // Joins each element of an array into a single string using a separator character between each element. Throws an error when the field is not an array.
-	JSON             *JsonProcessor             `json:"json,omitempty" yaml:"json,omitempty"`                           // Converts a JSON string into a structured JSON object.
+	JSON             *JsonProcessor             `json:"json,omitempty" yaml:"json,omitempty"`                           // Parses a string containing JSON data into a structured object, string, or other value.
 	KV               *KeyValueProcessor         `json:"kv,omitempty" yaml:"kv,omitempty"`                               // This processor helps automatically parse messages (or specific event fields) which are of the `foo=bar` variety.
 	Lowercase        *LowercaseProcessor        `json:"lowercase,omitempty" yaml:"lowercase,omitempty"`                 // Converts a string to its lowercase equivalent. If the field is an array of strings, all members of the array will be converted.
 	NetworkDirection *NetworkDirectionProcessor `json:"network_direction,omitempty" yaml:"network_direction,omitempty"` // Calculates the network direction given a source IP address, destination IP address, and a list of internal networks.

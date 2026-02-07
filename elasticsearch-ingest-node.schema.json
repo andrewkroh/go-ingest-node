@@ -1597,7 +1597,7 @@
       "required": [
         "field"
       ],
-      "description": "Converts a JSON string into a structured JSON object."
+      "description": "Parses a string containing JSON data into a structured object, string, or other value."
     },
     "KeyValueProcessor": {
       "properties": {
@@ -2003,7 +2003,7 @@
         },
         "json": {
           "$ref": "#/$defs/JsonProcessor",
-          "description": "Converts a JSON string into a structured JSON object."
+          "description": "Parses a string containing JSON data into a structured object, string, or other value."
         },
         "kv": {
           "$ref": "#/$defs/KeyValueProcessor",
