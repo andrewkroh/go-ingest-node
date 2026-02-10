@@ -1,6 +1,6 @@
 module github.com/andrewkroh/go-ingest-node/internal/jsonschema
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/andrewkroh/go-ingest-node v0.0.0-20231010172129-deae70ea76d8
