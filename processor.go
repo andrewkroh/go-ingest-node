@@ -491,6 +491,7 @@ type GrokProcessor struct {
 	PatternDefinitions map[string]string `json:"pattern_definitions,omitempty" yaml:"pattern_definitions,omitempty"`                           // A map of pattern-name and pattern tuples defining custom patterns to be used by the current processor. Patterns matching existing names will override the pre-existing definition.
 	Patterns           []GrokPattern     `json:"patterns" yaml:"patterns"`                                                                     // An ordered list of grok expression to match and extract named captures with. Returns on the first expression in the list that matches. Required.
 	TraceMatch         *bool             `json:"trace_match,omitempty" jsonschema:"default=false" yaml:"trace_match,omitempty"`                // When `true`, `_ingest._grok_match_index` will be inserted into your matched document’s metadata with the index into the pattern found in `patterns` that matched.
+	ValidateOnly       *bool             `json:"validate_only,omitempty" jsonschema:"default=false" yaml:"validate_only,omitempty"`            // When `true`, the processor does matching but does not extract structured fields.
 }
 
 /*

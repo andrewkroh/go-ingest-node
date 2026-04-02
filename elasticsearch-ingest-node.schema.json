@@ -1193,6 +1193,11 @@
           "type": "boolean",
           "description": "When `true`, `_ingest._grok_match_index` will be inserted into your matched document’s metadata with the index into the pattern found in `patterns` that matched.",
           "default": false
+        },
+        "validate_only": {
+          "type": "boolean",
+          "description": "When `true`, the processor does matching but does not extract structured fields.",
+          "default": false
         }
       },
       "additionalProperties": false,
