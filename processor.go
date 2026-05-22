@@ -123,6 +123,7 @@ const (
 // Type aliases.
 
 type (
+	ByteSize      any
 	DateTime      any
 	Field         string
 	Fields        any
@@ -167,14 +168,15 @@ Reference: [attachment processor]
 */
 type AttachmentProcessor struct {
 	ProcessorBase
-	Field             Field    `json:"field" yaml:"field"`                                                                   // The field to get the base64 encoded field from. Required.
-	IgnoreMissing     *bool    `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`  // If `true` and field does not exist, the processor quietly exits without modifying the document.
-	IndexedChars      *int64   `json:"indexed_chars,omitempty" jsonschema:"default=100000" yaml:"indexed_chars,omitempty"`   // The number of chars being used for extraction to prevent huge fields. Use `-1` for no limit.
-	IndexedCharsField *Field   `json:"indexed_chars_field,omitempty" yaml:"indexed_chars_field,omitempty"`                   // Field name from which you can overwrite the number of chars being used for extraction.
-	Properties        []string `json:"properties,omitempty" yaml:"properties,omitempty"`                                     // Array of properties to select to be stored. Can be `content`, `title`, `name`, `author`, `keywords`, `date`, `content_type`, `content_length`, `language`.
-	TargetField       *Field   `json:"target_field,omitempty" jsonschema:"default=attachment" yaml:"target_field,omitempty"` // The field that will hold the attachment information.
-	RemoveBinary      *bool    `json:"remove_binary,omitempty" jsonschema:"default=false" yaml:"remove_binary,omitempty"`    // If true, the binary field will be removed from the document.
-	ResourceName      *string  `json:"resource_name,omitempty" yaml:"resource_name,omitempty"`                               // Field containing the name of the resource to decode. If specified, the processor passes this resource name to the underlying Tika library to enable Resource Name Based Detection.
+	Field             Field     `json:"field" yaml:"field"`                                                                   // The field to get the base64 encoded field from. Required.
+	IgnoreMissing     *bool     `json:"ignore_missing,omitempty" jsonschema:"default=false" yaml:"ignore_missing,omitempty"`  // If `true` and field does not exist, the processor quietly exits without modifying the document.
+	IndexedChars      *int64    `json:"indexed_chars,omitempty" jsonschema:"default=100000" yaml:"indexed_chars,omitempty"`   // The number of chars being used for extraction to prevent huge fields. Use `-1` for no limit.
+	IndexedCharsField *Field    `json:"indexed_chars_field,omitempty" yaml:"indexed_chars_field,omitempty"`                   // Field name from which you can overwrite the number of chars being used for extraction.
+	MaxFieldBytes     *ByteSize `json:"max_field_bytes,omitempty" jsonschema:"default=-1" yaml:"max_field_bytes,omitempty"`   // Maximum allowed size of the attachment `field` value in bytes: length of a string (if base64 in JSON, checked before base64 decoding) or byte array length for binary (for example, CBOR). If set to `-1`, there is no per-processor limit. The node setting `ingest.attachment.max_field_size` also applies.
+	Properties        []string  `json:"properties,omitempty" yaml:"properties,omitempty"`                                     // Array of properties to select to be stored. Can be `content`, `title`, `name`, `author`, `keywords`, `date`, `content_type`, `content_length`, `language`.
+	TargetField       *Field    `json:"target_field,omitempty" jsonschema:"default=attachment" yaml:"target_field,omitempty"` // The field that will hold the attachment information.
+	RemoveBinary      *bool     `json:"remove_binary,omitempty" jsonschema:"default=false" yaml:"remove_binary,omitempty"`    // If true, the binary field will be removed from the document.
+	ResourceName      *string   `json:"resource_name,omitempty" yaml:"resource_name,omitempty"`                               // Field containing the name of the resource to decode. If specified, the processor passes this resource name to the underlying Tika library to enable Resource Name Based Detection.
 }
 
 /*
