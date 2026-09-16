@@ -424,7 +424,7 @@ func goIDName(name string) string {
 		return unicode.IsPunct(r)
 	})
 
-	var allParts []string
+	allParts := make([]string, 0, len(snakeCaseParts))
 	for _, p := range snakeCaseParts {
 		allParts = append(allParts, camelcase.Split(p)...)
 	}
